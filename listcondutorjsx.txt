@@ -1,0 +1,171 @@
+import { useEffect, useState, useContext } from 'react';
+import { Link } from 'react-router-dom';
+import { AuthContext } from '../../contexts/AuthContext';
+import axios from 'axios';
+
+const ListarCondutores = () => {
+
+    const [condutores, setCondutores] = useState([]);
+    const [success, setSuccess] = useState(false);
+    const [error, setError] = useState("");
+
+    const { token } = useContext(AuthContext);
+
+    useEffect(() => {
+        axios
+            .get("http://localhost:5000/api/v1/condutores", {
+                headers: {
+                    Authorization: token ? `Bearer ${token}` : undefined,
+                },
+            })
+            .then((res) => {
+                if (res.data.status) {
+                    setCondutores(res.data.data);
+                } else {
+                    setError("Ocorreu um erro na execução do pedido.");
+                }
+            })
+            .catch((error) => {
+                setError("Erro na ligação à API. " + error.message);
+            });
+    }, [token]);
+
+    const [condutorToDelete, setCondutorToDelete] = useState(null);
+
+    const deleteCondutor = (id) => {
+        axios.delete(`http://localhost:5000/api/v1/condutor/${id}`, {
+            headers: {
+                Authorization: token ? `Bearer ${token}` : undefined,
+            },
+        })
+            .then((res) => {
+                if (res.status === 204) {
+                    setSuccess(true);
+                    setCondutores((prevCondutores) =>
+                        prevCondutores.filter((condutor) => condutor.id !== id)
+                    );
+                } else {
+                    setError("Ocorreu um erro ao eliminar o condutor.");
+                }
+                
+            })
+            .catch((error) => {
+                setError("Erro na ligação à API. " + error.message);
+                console.error("Erro ao eliminar condutor:", error);
+            })
+    };
+
+    return (
+        <>
+            <div className="container py-4">
+                <header className="d-flex justify-content-between align-items-center mb-4">
+                    <h1 className="mb-0"><i className="bi bi-person-lines-fill"></i> Lista de Condutores</h1>
+                    <a href="/condutor/create" className="btn btn-success">
+                        <i className="bi bi-person-plus-fill"></i> Adicionar Novo Condutor
+                    </a>
+                </header>
+                {success && (
+                    <div className="alert alert-success alert-dismissible fade show text-center mb-4" role="alert">
+                        <i className="bi bi-check-circle-fill me-2"></i>
+                        Condutor eliminado com sucesso!
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                )}
+                {error && (
+                    <div className="alert alert-danger alert-dismissible fade show text-center mb-4" role="alert">
+                        <i className="bi bi-exclamation-triangle-fill me-2"></i>
+                        {error}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                )}
+                <div className="card shadow-sm">
+                    <div className="card-header py-3">
+                        <h5 className="mb-0"><i className="bi bi-table"></i> Condutores Registados</h5>
+                    </div>
+                    <div className="card-body">
+                        <div className="table-responsive">
+                            {condutores.length === 0 ? (
+                                <div className="alert alert-info" role="alert">
+                                    Não existem condutores para mostrar.
+                                </div>
+                            ) : (
+                                <table className="table table-hover table-sm align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Nome</th>
+                                            <th>Nº Carta Condução</th>
+                                            <th>Contacto</th>
+                                            <th>Veículo Atual</th>
+                                            <th className="text-end">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {condutores.map((condutor) => (
+                                            <tr key={condutor.id}>
+                                                <td>{condutor.id}</td>
+                                                <td>{condutor.nome}</td>
+                                                <td>{condutor.carta_de_conducao}</td>
+                                                <td>{condutor.contacto}</td>
+                                                {condutor.veiculo_condutor ? (
+                                                    <td><span className="badge text-bg-primary">{condutor.veiculo_condutor.marca} {condutor.veiculo_condutor.modelo} - ({condutor.veiculo_condutor.matricula})</span></td>
+                                                ) : (
+                                                    <td><span className="badge text-bg-success">Disponível</span></td>
+                                                )}
+                                                <td className="text-end">
+                                                    <Link
+                                                        to={`/condutor/${condutor.id}`}
+                                                        className="btn btn-sm btn-outline-info me-1"
+                                                        title="Ver Detalhes">
+                                                            <i className="bi bi-eye"></i>
+                                                    </Link>
+                                                    <Link
+                                                        to={`/condutor/edit/${condutor.id}`}
+                                                        className="btn btn-sm btn-outline-primary me-1"
+                                                        title="Editar">
+                                                            <i className="bi bi-pencil"></i>
+                                                    </Link>
+                                                    <button
+                                                        className="btn btn-sm btn-outline-danger"
+                                                        title="Eliminar"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#deleteModal" 
+                                                        onClick={() => setCondutorToDelete(condutor)}>
+                                                            <i className="bi bi-trash"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            )}
+                        </div>
+                    </div>
+                    <div className="card-footer text-center">
+                        <small className="text-muted">Fim da lista. Existem {condutores.length} condutores registados.</small>
+                    </div>
+                </div>
+            </div>
+            <div className="modal fade" id="deleteModal" tabIndex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                <div className="modal-dialog" role="document">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h5 className="modal-title" id="deleteModalLabel">Eliminar Veículo</h5>
+                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div className="modal-body">
+                            <p>Tem a certeza que deseja eliminar o veículo com o nome <strong>{condutorToDelete?.nome}</strong>?</p>
+                            <p className="text-danger">Esta ação não pode ser revertida.</p>
+                        </div>
+                        <div className="modal-footer">
+                            <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="button" className="btn btn-danger" data-bs-dismiss="modal" onClick={() => deleteCondutor(condutorToDelete.id)}>Eliminar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </>
+    );
+};
+
+export default ListarCondutores;
