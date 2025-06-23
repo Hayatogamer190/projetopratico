@@ -1,0 +1,14 @@
+const express = require("express");
+const router = express.Router();
+
+const middleware = require("../middleware");
+
+const veiculoController = require("../controllers/veiculo.controller");
+
+router.get("/veiculos", middleware.checkToken, veiculoController.getAllVeiculos);
+router.get("/veiculo/:id", middleware.checkToken, veiculoController.getVeiculoById);
+router.post("/veiculo", middleware.checkToken, veiculoController.createVeiculo);
+router.put("/veiculo/:id", middleware.checkToken, veiculoController.updateVeiculo);
+router.delete("/veiculo/:id", middleware.checkToken, veiculoController.deleteVeiculo);
+
+module.exports = router;
