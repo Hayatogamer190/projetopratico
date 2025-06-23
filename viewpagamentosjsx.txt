@@ -1,0 +1,101 @@
+import { useEffect, useState, useContext } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { Link } from 'react-router-dom';
+import { AuthContext } from "../../contexts/AuthContext";
+import axios from "axios";
+
+const VerPagamento = () => {
+
+    const { id } = useParams();
+    const [pagamento, setPagamento] = useState([]);
+
+    const { token } = useContext(AuthContext);
+
+    useEffect(() => {
+        if (id && token) {
+            axios.get(`http://localhost:5000/api/v1/pagamento/${id}`, {
+                headers: {
+                Authorization: token ? `Bearer ${token}` : undefined,
+                },
+            })
+            .then((res) => {
+                setPagamento(res.data.data);
+            })
+            .catch(() => setError("Erro ao carregar dados do viagem."));
+        }
+    }, [id, token]);
+
+    return (
+        <>
+            <main className="container py-4">
+                <header className="d-flex justify-content-between align-items-center mb-4">
+                    <h1 className="mb-0"><i className="bi bi-credit-card-2-front-fill"></i> Detalhes do Pagamento ID: <span className="text-primary">{pagamento.id} - ({pagamento.tipo_de_pagamento})</span></h1>
+                    <a href="/pagamentos" className="btn btn-outline-secondary"><i className="bi bi-arrow-left-circle"></i> Voltar à Lista</a>
+                </header>
+
+                <div className="card shadow-sm">
+                    <div className="card-header">
+                        <h5 className="mb-0"><i className="bi bi-info-circle-fill"></i> {pagamento.tipo_de_pagamento} para o veículo {pagamento.veiculo_pagamento ? ( <> {pagamento.veiculo_pagamento.marca} {pagamento.veiculo_pagamento.modelo} - ({pagamento.veiculo_pagamento.matricula}) </> ) : ( "" )}</h5>
+                    </div>
+                    <div className="card-body">
+                        <div className="row details-list">
+                            <div className="col-md-12">
+                                <dl className="row">
+                                    <dt className="col-sm-4 col-lg-3">Tipo de Pagamento:</dt>
+                                    <dd className="col-sm-8 col-lg-9">{pagamento.tipo_de_pagamento}</dd>
+
+                                    <dt className="col-sm-4 col-lg-3">Valor:</dt>
+                                    <dd className="col-sm-8 col-lg-9">{pagamento.valor} €</dd>
+
+                                    <dt className="col-sm-4 col-lg-3">Data de Vencimento:</dt>
+                                    <dd className="col-sm-8 col-lg-9">{pagamento.data_vencimento}</dd>
+
+                                    <dt className="col-sm-4 col-lg-3">Estado do Pagamento:</dt>
+                                    {
+                                        pagamento.estado === 'Pago' ? <dd className="col-sm-7 col-lg-8"><span className="badge text-bg-success">Pago</span></dd> :
+                                        pagamento.estado === 'Pendente' ? <dd className="col-sm-8 col-lg-9"><span className="badge text-bg-warning">Pendente</span></dd> :
+                                        pagamento.estado === 'Vencido' ? <dd className="col-sm-7 col-lg-8"><span className="badge text-bg-danger">Vencido</span></dd> :
+                                        <dd className="col-sm-7 col-lg-8"><span className="badge text-bg-light">Desconhecido</span></dd>
+                                    }
+                                </dl>
+                            </div>
+                        </div>
+                        <hr />
+                        <div className="section-title">
+                            <h5 className="mt-4"><i className="bi bi bi-truck"></i> Veículo Atribuído</h5>
+                        </div>
+                        {pagamento.veiculo_pagamento ? (
+                            <ul className="list-group">
+                                <li className="list-group-item">
+                                    <div className="d-flex w-100 justify-content-between align-items-center">
+                                        <div>
+                                            <h6 className="mb-1">{pagamento.veiculo_pagamento.marca} {pagamento.veiculo_pagamento.modelo} ({pagamento.veiculo_pagamento.matricula})</h6>
+                                            <small className="text-muted">Tipo: {pagamento.veiculo_pagamento.tipo}</small>
+                                        </div>
+                                        {
+                                            pagamento.veiculo_pagamento.estado === 'Operacional' ? <span className="badge text-bg-success">Operacional</span> :
+                                            pagamento.veiculo_pagamento.estado === 'Em Manutenção' ? <span className="badge text-bg-warning">Em Manutenção</span> :
+                                            pagamento.veiculo_pagamento.estado === 'Vendido' ? <span className="badge text-bg-secondary">Vendido</span> :
+                                            pagamento.veiculo_pagamento.estado === 'Fora de Serviço' ? <span className="badge text-bg-danger">Fora de Serviço</span> :
+                                            pagamento.veiculo_pagamento.estado === 'Abatido' ? <span className="badge text-bg-dark">Abatido</span> :
+                                            <span className="badge text-bg-light">Desconhecido</span>
+                                        }
+                                    </div>
+                                </li>
+                            </ul>
+                        ) : (
+                            <div className="alert alert-info" role="alert">
+                                Este pagamento não tem nenhum veículo atribuído.
+                            </div>
+                        )}
+                    </div>
+                    <div className="card-footer text-end">
+                        <a href="/pagamento/edit" className="btn btn-primary"><i className="bi bi-pencil-fill"></i> Editar Pagamento</a>
+                    </div>
+                </div>
+            </main>
+        </>
+    )
+}
+
+export default VerPagamento;
