@@ -1,0 +1,126 @@
+import { useEffect, useState, useContext } from "react";
+import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../../contexts/AuthContext";
+import axios from "axios";
+
+const CriarVeiculo = () => {
+    const [veiculo, setVeiculo] = useState({ marca: "", modelo: "", matricula: "", ano: "", tipo: "", estado: "", localidade: "", ultima_manutencao: "" });
+    const [success, setSuccess] = useState(false);
+    const [error, setError] = useState("");
+
+    const nav = useNavigate();
+    const { token } = useContext(AuthContext);
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setVeiculo({ ...veiculo, [name]: value });
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        axios.post(`http://localhost:5000/api/v1/veiculo`, veiculo, {
+            headers: {
+                Authorization: token ? `Bearer ${token}` : undefined,
+            },
+        })
+        .then(() => {
+            setSuccess(true);
+            setTimeout(() => nav("/veiculos"), 1500);
+        })
+        .catch((error) => setError(error.response?.data?.message || "Erro ao inserir veículo."));
+    };
+
+    return (
+        <>
+            <div className="container py-4">
+                <header className="mb-4">
+                    <h1 className="mb-0"><i className="bi bi-plus-circle-fill"></i> Adicionar Novo Veículo</h1>
+                    <p className="text-muted">Preencha os dados do novo veículo.</p>
+                </header>
+                {success && (
+                    <div className="alert alert-success alert-dismissible fade show text-center mb-4" role="alert">
+                        <i className="bi bi-check-circle-fill me-2"></i>
+                        Veículo guardado com sucesso! A redirecionar para a lista de veiculos..
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                )}
+                {error && (
+                    <div className="alert alert-danger alert-dismissible fade show text-center mb-4" role="alert">
+                        <i className="bi bi-exclamation-triangle-fill me-2"></i>
+                        {error}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                )}
+                <div className="card shadow-sm">
+                    <div className="card-body">
+                        <form onSubmit={handleSubmit}>
+                            <div className="row g-3">
+                                <div className="col-md-6">
+                                    <label htmlFor="marca" className="form-label">Marca*</label>
+                                    <input type="text" className="form-control" id="marca" name="marca" placeholder="Ex: Mercedes-Benz" value={veiculo.marca} 
+                                        onChange={handleChange} required />
+                                </div>
+                                <div className="col-md-6">
+                                    <label htmlFor="modelo" className="form-label">Modelo*</label>
+                                    <input type="text" className="form-control" id="modelo" name="modelo" placeholder="Ex: Actros" value={veiculo.modelo} 
+                                        onChange={handleChange} required />
+                                </div>
+                                <div className="col-md-6">
+                                    <label htmlFor="matricula" className="form-label">Matrícula*</label>
+                                    <input type="text" className="form-control" id="matricula" name="matricula" placeholder="XX-00-YY" value={veiculo.matricula} 
+                                        onChange={handleChange} required />
+                                </div>
+                                <div className="col-md-6">
+                                    <label htmlFor="ano" className="form-label">Ano de Fabrico*</label>
+                                    <input type="number" className="form-control" id="ano" name="ano" placeholder="AAAA" min="1900" max="2099" value={veiculo.ano} 
+                                        onChange={handleChange} required />
+                                </div>
+                                <div className="col-md-6">
+                                    <label htmlFor="tipo" className="form-label">Tipo de Veículo*</label>
+                                    <select className="form-select" id="tipo" name="tipo" value={veiculo.tipo} onChange={handleChange} required >
+                                        <option value="" disabled>Escolha...</option>
+                                        <option value="Ligeiro Passageiros">Ligeiro Passageiros</option>
+                                        <option value="Ligeiro Mercadorias">Ligeiro Mercadorias</option>
+                                        <option value="Pesado Mercadorias">Pesado Mercadorias</option>
+                                        <option value="Máquina Industrial">Máquina Industrial</option>
+                                        <option value="Outro">Outro</option>
+                                    </select>
+                                </div>
+                                <div className="col-md-6">
+                                    <label htmlFor="estado" className="form-label">Estado*</label>
+                                    <select className="form-select" id="estado" name="estado" value={veiculo.estado} onChange={handleChange} required>
+                                        <option value="" disabled>Escolha...</option>
+                                        <option value="Operacional">Operacional</option>
+                                        <option value="Em Manutenção">Em Manutenção</option>
+                                        <option value="Fora de Serviço">Fora de Serviço</option>
+                                        <option value="Vendido">Vendido</option>
+                                        <option value="Abatido">Abatido</option>
+                                    </select>
+                                </div>
+                                <div className="col-md-6">
+                                    <label htmlFor="localidade" className="form-label">Localidade*</label>
+                                    <input type="text" className="form-control" id="localidade" name="localidade" placeholder="Ex: Lisboa" value={veiculo.localidade} onChange={handleChange} required/>
+                                </div>
+                                <div className="col-md-6">
+                                    <label htmlFor="ultima_manutencao" className="form-label">Data da Última Manutenção*</label>
+                                    <input type="date" className="form-control" id="ultima_manutencao" name="ultima_manutencao" value={veiculo.ultima_manutencao} onChange={handleChange} required/>
+                                </div>
+                            </div>
+
+                            <div className="mt-4 pt-3 border-top d-flex justify-content-end">
+                                <a href="/veiculos" className="btn btn-outline-secondary me-2">
+                                    <i className="bi bi-x-circle"></i> Cancelar
+                                </a>
+                                <button type="submit" className="btn btn-success">
+                                    <i className="bi bi-check-circle-fill"></i> Guardar Veículo
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </>
+    )
+}
+
+export default CriarVeiculo;
