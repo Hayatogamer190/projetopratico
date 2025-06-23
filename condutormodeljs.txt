@@ -1,0 +1,35 @@
+const sequelize = require("sequelize");
+const conexao = require("../config/database");
+
+const Condutor = conexao.define(
+    "condutor",
+    {
+        id: {
+            type: sequelize.INTEGER,
+            primaryKey: true,
+            autoIncrement: true
+        },
+        nome: {
+            type: sequelize.STRING,
+            allowNull: false
+        },
+        carta_de_conducao: {
+            type: sequelize.STRING,
+            allowNull: false
+        },
+        contacto: {
+            type: sequelize.INTEGER,
+            allowNull: false
+        },
+        veiculo_atual: {
+            type: sequelize.INTEGER,
+            allowNull: true
+        }
+    },
+    {
+        tableName: "condutor",
+        timestamps: false
+    }
+);
+
+module.exports = Condutor;
