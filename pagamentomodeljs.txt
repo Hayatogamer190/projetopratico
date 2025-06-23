@@ -1,0 +1,39 @@
+const sequelize = require("sequelize");
+const conexao = require("../config/database");
+
+const Pagamento = conexao.define(
+    "pagamento",
+    {
+        id: {
+            type: sequelize.INTEGER,
+            primaryKey: true,
+            autoIncrement: true
+        },
+        veiculo: {
+            type: sequelize.INTEGER,
+            allowNull: true
+        },
+        tipo_de_pagamento: {
+            type: sequelize.STRING,
+            allowNull: false
+        },
+        valor: {
+            type: sequelize.DECIMAL,
+            allowNull: false
+        },
+        data_vencimento: {
+            type: sequelize.DATE,
+            allowNull: false
+        },
+        estado: {
+            type: sequelize.STRING,
+            allowNull: false
+        }
+    },
+    {
+        tableName: "pagamento",
+        timestamps: false
+    }
+);
+
+module.exports = Pagamento;
