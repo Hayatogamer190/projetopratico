@@ -1,0 +1,14 @@
+const express = require("express");
+const router = express.Router();
+
+const middleware = require("../middleware");
+
+const pagamentoController = require("../controllers/pagamento.controller");
+
+router.get("/pagamentos", middleware.checkToken, pagamentoController.getAllPagamentos);
+router.get("/pagamento/:id", middleware.checkToken, pagamentoController.getPagamentoById);
+router.post("/pagamento", middleware.checkToken, pagamentoController.createPagamento);
+router.put("/pagamento/:id", middleware.checkToken, pagamentoController.updatePagamento);
+router.delete("/pagamento/:id", middleware.checkToken, pagamentoController.deletePagamento);
+
+module.exports = router;
