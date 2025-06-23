@@ -1,0 +1,145 @@
+import { useEffect, useState, useContext } from "react";
+import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../../contexts/AuthContext";
+import axios from "axios";
+
+const CriarPagamento = () => {
+
+    const [pagamento, setPagamento] = useState({ veiculo: "", tipo_de_pagamento: "", valor: "", data_vencimento: "", estado: "" });
+    const [veiculos, setVeiculos] = useState([]);
+    const [success, setSuccess] = useState(false);
+    const [error, setError] = useState("");
+
+    const nav = useNavigate();
+    const { token } = useContext(AuthContext);
+
+    useEffect(() => {
+        axios.get("http://localhost:5000/api/v1/veiculos", {
+            headers: {
+                Authorization: token ? `Bearer ${token}` : undefined,
+            },
+        })
+        .then((res) => {
+            if (res.data.status) {
+                setVeiculos(res.data.data);
+            } else {
+            setError("Ocorreu um erro na execução do pedido.");
+            }
+        })
+        .catch((error) => {
+            setError("Erro na ligação à API. " + error.message);
+        });
+    }, [token]);
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setPagamento({ ...pagamento, [name]: value });
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        axios.post(`http://localhost:5000/api/v1/pagamento`, pagamento, {
+            headers: {
+                Authorization: token ? `Bearer ${token}` : undefined,
+            },
+        })
+        .then(() => {
+            setSuccess(true);
+            setTimeout(() => nav("/pagamentos"), 1500);
+        })
+        .catch((error) => setError(error.response?.data?.message || "Erro ao inserir pagamento."));
+    };
+
+    return (
+        <>
+            <div className="container py-4">
+                <header className="mb-4">
+                    <h1 className="mb-0"><i className="bi bi-plus-circle-fill"></i> Registar Novo Pagamento</h1>
+                    <p className="text-muted">Preencha os detalhes do novo pagamento.</p>
+                </header>
+                {success && (
+                    <div className="alert alert-success alert-dismissible fade show text-center mb-4" role="alert">
+                        <i className="bi bi-check-circle-fill me-2"></i>
+                        Pagamento inserido com sucesso! A redirecionar para a lista de pagamentos..
+                        <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                )}
+                {error && (
+                    <div className="alert alert-danger alert-dismissible fade show text-center mb-4" role="alert">
+                        <i className="bi bi-exclamation-triangle-fill me-2"></i>
+                        {error}
+                        <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                )}
+                <div className="card shadow-sm">
+                    <div className="card-body">
+                        <form onSubmit={handleSubmit}>
+                            <div className="row g-3">
+                                <div className="col-md-6">
+                                    <label htmlFor="veiculo" className="form-label">Veículo Associado*</label>
+                                    <select className="form-select" id="veiculo" name="veiculo" value={pagamento.veiculo}
+                                        onChange={handleChange} required>
+                                        <option value="" disabled>Selecione um veículo...</option>
+                                        {veiculos
+                                            .filter(veiculo =>
+                                                (veiculo.estado !== 'Abatido')
+                                            )
+                                            .map((veiculo) => (
+                                                <option key={veiculo.id} value={veiculo.id}>
+                                                    {veiculo.marca} {veiculo.modelo} - ({veiculo.matricula}) - {veiculo.tipo}
+                                                </option>
+                                            ))
+                                        }
+                                    </select>
+                                </div>
+                                <div className="col-md-6">
+                                    <label htmlFor="tipo_de_pagamento" className="form-label">Tipo de Pagamento*</label>
+                                    <select className="form-select" id="tipo_de_pagamento" name="tipo_de_pagamento" value={pagamento.tipo_de_pagamento}
+                                        onChange={handleChange} required>
+                                        <option value="" disabled>Escolha o tipo...</option>
+                                        <option value="Seguro Automóvel">Seguro Automóvel</option>
+                                        <option value="IUC">IUC (Imposto Único de Circulação)</option>
+                                        <option value="Manutenção Programada">Manutenção</option>
+                                        <option value="Reparação Extraordinária">Reparação Extraordinária</option>
+                                        <option value="Portagens">Portagens</option>
+                                        <option value="Combustível">Combustível</option>
+                                        <option value="Financiamento/Leasing">Financiamento/Leasing</option>
+                                        <option value="Multa">Multa</option>
+                                        <option value="Outro">Outro</option>
+                                    </select>
+                                </div>
+                                <div className="col-md-6">
+                                    <label htmlFor="valor" className="form-label">Valor (€)*</label>
+                                    <input type="number" className="form-control" id="valor" name="valor" step="0.01" placeholder="Ex: 150.75" value={pagamento.valor}
+                                        onChange={handleChange} required />
+                                </div>
+                                <div className="col-md-6">
+                                    <label htmlFor="data_vencimento" className="form-label">Data de Vencimento*</label>
+                                    <input type="date" className="form-control" id="data_vencimento" name="data_vencimento" value={pagamento.data_vencimento}
+                                        onChange={handleChange} required />
+                                </div>
+                                <div className="col-md-6">
+                                    <label htmlFor="estado" className="form-label">Estado do Pagamento*</label>
+                                    <select className="form-select" id="estado" name="estado" value={pagamento.estado}
+                                        onChange={handleChange} required>
+                                        <option value="" disabled>Selecione o estado...</option>
+                                        <option value="Pendente">Pendente</option>
+                                        <option value="Pago">Pago</option>
+                                        <option value="Vencido">Vencido</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div className="mt-4 pt-3 border-top d-flex justify-content-end">
+                                <a href="/pagamentos" className="btn btn-outline-secondary me-2"><i className="bi bi-x-circle"></i> Cancelar</a>
+                                <button type="submit" className="btn btn-success"><i className="bi bi-check-circle-fill"></i> Guardar Pagamento</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </>
+    )
+}
+
+export default CriarPagamento;
