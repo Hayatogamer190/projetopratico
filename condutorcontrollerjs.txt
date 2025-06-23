@@ -1,0 +1,135 @@
+const { Condutor } = require("../models");
+
+const endpointsFunction = {};
+
+endpointsFunction.getAllCondutores = async (req, res) => {
+  try {
+    const dados = await Condutor.findAll({
+      include: 'veiculo_condutor'
+    });
+
+    res.status(200).json({
+      status: "success",
+      message: "Lista de condutores.",
+      data: dados,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "Ocorreu um erro ao listar condutores.",
+      data: null,
+    });
+  }
+};
+
+endpointsFunction.createCondutor = async (req, res) => {
+  const { nome, carta_de_conducao, contacto, veiculo_atual } = req.body;
+  console.log( nome, carta_de_conducao, contacto, veiculo_atual );
+  try {
+    const dados = await Condutor.create({
+      nome: nome,
+      carta_de_conducao: carta_de_conducao,
+      contacto: contacto,
+      veiculo_atual: veiculo_atual
+    });
+
+    res.status(201).json({
+      status: "success",
+      message: "Condutor criado com sucesso.",
+      data: dados,
+    });
+  } catch (error) {
+    res.status(404).json({
+      status: "error",
+      message: "Ocorreu um erro ao criar condutor.",
+      data: null,
+    });
+  }
+};
+
+endpointsFunction.getCondutorById = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const dados = await Condutor.findOne({
+      where: { id: id },
+      include: 'veiculo_condutor'
+    });
+    if (!dados) {
+      return res.status(404).json({
+        status: "error",
+        message: "Condutor não encontrado.",
+      });
+    }
+
+    res.status(200).json({
+      status: "success",
+      message: "Condutor encontrado com sucesso.",
+      data: dados,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "Ocorreu um erro ao listar condutor.",
+      data: null,
+    });
+  }
+};
+
+endpointsFunction.updateCondutor = async (req, res) => {
+  const { id } = req.params;
+  const { nome, carta_de_conducao, contacto, veiculo_atual } = req.body;
+
+  try {
+    const dados = await Condutor.update(
+      {
+        nome: nome,
+        carta_de_conducao: carta_de_conducao,
+        contacto: contacto,
+        veiculo_atual: veiculo_atual || null
+      },
+      {
+        where: { id: id },
+      }
+    );
+    if (!dados) {
+      return res.status(404).json({
+        status: "error",
+        message: "Condutor não encontrado.",
+      });
+    }
+    res.status(200).json({
+      status: "success",
+      message: "Condutor atualizado com sucesso.",
+      data: dados,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "Ocorreu um erro ao atualizar condutor.",
+      data: null,
+    });
+  }
+};
+
+endpointsFunction.deleteCondutor = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const dados = await Condutor.destroy({
+      where: { id: id },
+    });
+
+    res.status(204).json({
+      status: "success",
+      message: "Condutor apagado com sucesso.",
+      data: dados,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "Ocorreu um erro ao apagar condutor.",
+      data: null,
+    });
+  }
+};
+
+module.exports = endpointsFunction;
