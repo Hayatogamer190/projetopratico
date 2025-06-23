@@ -1,0 +1,62 @@
+import React, { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import axios from "axios";
+
+const Register = () => {
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [error, setError] = useState("");
+    const [success, setSuccess] = useState(false);
+    const nav = useNavigate();
+
+    const handleRegister = (e) => {
+        e.preventDefault();
+        setError("");
+        setSuccess(false);
+
+        axios.post("http://localhost:5000/api/v1/register", { email, password })
+            .then((res) => {
+                if (res.data.success) {
+                    setSuccess(true);
+                    setTimeout(() => nav("/"), 2000);
+                } else {
+                    setError("Erro ao criar conta.");
+                }
+            })
+            .catch(() => {
+                setError("O email introduzido já existe ou ocorreu um erro.");
+            });
+    };
+
+    return (
+        <div className="container d-flex justify-content-center align-items-center">
+            <div className="card shadow-sm">
+                <div className="card-body p-5">
+                    <div className="row g-3">
+                        <h1 className="card-title text-center mb-4">Criar Conta</h1>
+                        {success && <div className="alert alert-success">Conta criada! A redirecionar para o login...</div>}
+                        {error && <div className="alert alert-danger">{error}</div>}
+                        <form onSubmit={handleRegister}>
+                            <div className="mb-3">
+                                <label htmlFor="email" className="form-label">Email</label>
+                                <input type="email" className="form-control" id="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                            </div>
+                            <div className="mb-3">
+                                <label htmlFor="password" className="form-label">Password</label>
+                                <input type="password" className="form-control" id="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                            </div>
+                            <div className="d-grid">
+                                <button type="submit" className="btn btn-primary">Registar</button>
+                            </div>
+                        </form>
+                        <div className="text-center mt-3">
+                            <Link to="/">Já tem conta? Fazer Login</Link>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default Register;
