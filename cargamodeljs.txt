@@ -1,0 +1,47 @@
+const sequelize = require("sequelize");
+const conexao = require("../config/database");
+
+const Carga = conexao.define(
+    "carga",
+    {
+        id: {
+            type: sequelize.INTEGER,
+            primaryKey: true,
+            autoIncrement: true
+        },
+        veiculo: {
+            type: sequelize.STRING,
+            allowNull: true
+        },
+        tipo_de_carga: {
+            type: sequelize.STRING,
+            allowNull: false
+        },
+        peso: {
+            type: sequelize.DECIMAL,
+            allowNull: false
+        },
+        local_origem: {
+            type: sequelize.STRING,
+            allowNull: false
+        },
+        local_destino: {
+            type: sequelize.STRING,
+            allowNull: false
+        },
+        data_carga: {
+            type: sequelize.DATE,
+            allowNull: false
+        },
+        frequencia: {
+            type: sequelize.STRING,
+            allowNull: false
+        }
+    },
+    {
+        tableName: "carga",
+        timestamps: false
+    }
+);
+
+module.exports = Carga;
