@@ -1,0 +1,250 @@
+import { useEffect, useState, useContext } from 'react';
+import { Link } from 'react-router-dom';
+import axios from 'axios';
+import { AuthContext } from '../contexts/AuthContext';
+
+const HomePage = () => {
+
+    const [veiculos, setVeiculos] = useState([]);
+    const [condutores, setCondutores] = useState([]);
+    const [pagamentos, setPagamentos] = useState([]);
+    const [manutencoes, setManutencoes] = useState([]);
+
+    const { token } = useContext(AuthContext);
+
+    useEffect(() => {
+        axios
+            .get("http://localhost:5000/api/v1/veiculos", {
+                headers: {
+                    Authorization: token ? `Bearer ${token}` : undefined,
+                },
+            })
+            .then((res) => {
+                if (res.data.status) {
+                    setVeiculos(res.data.data);
+                } else {
+                    setError("Ocorreu um erro na execução do pedido.");
+                }
+            })
+            .catch((error) => {
+                setError("Erro na ligação à API. " + error.message);
+            });
+    }, [token]);
+
+    useEffect(() => {
+        axios
+            .get("http://localhost:5000/api/v1/condutores", {
+                headers: {
+                    Authorization: token ? `Bearer ${token}` : undefined,
+                },
+            })
+            .then((res) => {
+                if (res.data.status) {
+                    setCondutores(res.data.data);
+                } else {
+                    setError("Ocorreu um erro na execução do pedido.");
+                }
+            })
+            .catch((error) => {
+                setError("Erro na ligação à API. " + error.message);
+            });
+    }, [token]);
+
+    useEffect(() => {
+        axios.get("http://localhost:5000/api/v1/pagamentos", {
+            headers: {
+                Authorization: token ? `Bearer ${token}` : undefined,
+            },
+        })
+        .then((res) => {
+            if (res.data.status) {
+                setPagamentos(res.data.data);
+            } else {
+                setError("Ocorreu um erro na execução do pedido.");
+            }
+        })
+        .catch((error) => {
+            setError("Erro na ligação à API. " + error.message);
+        });
+    }, [token]);
+
+    useEffect(() => {
+        axios.get("http://localhost:5000/api/v1/manutencoes", {
+            headers: {
+                Authorization: token ? `Bearer ${token}` : undefined,
+            },
+        })
+        .then((res) => {
+            if (res.data.status) {
+                setManutencoes(res.data.data);
+            } else {
+                setError("Ocorreu um erro na execução do pedido.");
+            }
+        })
+        .catch((error) => {
+            setError("Erro na ligação à API. " + error.message);
+        });
+    }, [token]);
+
+    return (
+        <>
+            <div className="container mt-4">
+                <header className="mb-4 border-bottom pb-3">
+                    <div className="d-flex justify-content-between align-items-center">
+                        <h1><i className="bi bi-speedometer2"></i> Dashboard</h1>
+                        <span className="text-muted fs-5" id="currentDate"></span>
+                    </div>
+                    <p className="lead mb-0">Bem-vindo ao Gestor de Frota.</p>
+                </header>
+
+                <div className="row mb-4">
+                    <div className="col-md-6 mb-3">
+                        <div className="card shadow-sm h-100">
+                            <div className="card-body text-center">
+                                <i className="bi bi-truck fs-1 text-primary mb-2"></i>
+                                <h5 className="card-title">Frota de Veículos</h5>
+                                <div className="card-text">
+                                    <strong className="fs-4">{veiculos.length}</strong><br />
+                                    <div className="alert-summary-item">
+                                        Operacionais: <strong className="text-muted">{veiculos.filter(veiculo => veiculo.estado === 'Operacional').length}</strong>
+                                    </div>
+                                    <div className="alert-summary-item">
+                                        Em Manutenção: <strong className="text-muted">{veiculos.filter(veiculo => veiculo.estado === 'Em Manutenção').length}</strong>
+                                    </div>
+                                </div>
+                                <hr />
+                                <a href="/veiculos" className="btn btn-primary"><i className="bi bi-card-list"></i> Gerir Veículos</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="col-md-6 mb-3">
+                        <div className="card shadow-sm h-100">
+                            <div className="card-body text-center">
+                                <i className="bi bi-person-lines-fill fs-1 text-primary mb-2"></i>
+                                <h5 className="card-title">Condutores</h5>
+                                <div className="card-text">
+                                    <strong className="fs-4">{condutores.length}</strong><br />
+                                    <div className="alert-summary-item">
+                                        Ativos: <strong className="text-muted">{condutores.filter(condutor => condutor.veiculo_condutor).length}</strong>
+                                    </div>
+                                    <div className="alert-summary-item">
+                                        Disponíveis: <strong className="text-muted">{condutores.filter(condutor => !condutor.veiculo_condutor).length}</strong>
+                                    </div>
+                                </div>
+                                <hr />
+                                <a href="/condutores" className="btn btn-primary"><i className="bi bi-card-list"></i> Gerir Condutores</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="card shadow mb-4" id="pagamentos">
+                    <div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 className="m-0 font-weight-bold text-danger"><i className="bi bi-exclamation-triangle-fill"></i> Pagamentos</h6>
+                        <a href="/pagamentos" className="btn btn-sm btn-outline-danger">Ver Todos</a>
+                    </div>
+                    <div className="card-body">
+                        <div className="table-responsive">
+                            {pagamentos.length === 0 ? (
+                                <div className="alert alert-info" role="alert">
+                                    Não existem cargas para mostrar.
+                                </div>
+                            ) : (
+                                <table className="table table-hover table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Matrícula</th>
+                                            <th>Tipo de Pagamento</th>
+                                            <th>Data Vencimento</th>
+                                            <th>Valor</th>
+                                            <th>Estado</th>
+                                            <th>Ação</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {pagamentos
+                                        .filter(pagamento =>
+                                            (pagamento.estado === 'Pendente')
+                                        )
+                                        .map((pagamento) => (
+                                            <tr key={pagamento.id}>
+                                                <td>{pagamento.veiculo_pagamento.marca} {pagamento.veiculo_pagamento.modelo} - ({pagamento.veiculo_pagamento.matricula})</td>
+                                                <td>{pagamento.tipo_de_pagamento}</td>
+                                                <td>{pagamento.data_vencimento}</td>
+                                                <td>{pagamento.valor} €</td>
+                                                <td><span className="badge text-bg-warning">{pagamento.estado}</span></td>
+                                                <td>
+                                                    <Link
+                                                        to={`/pagamento/edit/${pagamento.id}`}
+                                                        className="btn btn-sm btn-warning"
+                                                        title="Editar">
+                                                            <i className="bi bi-pencil"></i> Gerir
+                                                    </Link>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            )}
+                        </div>
+                         <em className="text-muted small">Acompanhe os pagamentos para evitar multas.</em>
+                    </div>
+                </div>
+
+                <div className="card shadow mb-5" id="manutencoes">
+                    <div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 className="m-0 font-weight-bold text-primary"><i className="bi bi-tools"></i> Manutenções</h6>
+                        <a href="/manutencoes" className="btn btn-sm btn-outline-primary">Ver Todas</a>
+                    </div>
+                    <div className="card-body">
+                        <div className="table-responsive">
+                            {manutencoes.length === 0 ? (
+                                <div className="alert alert-info" role="alert">
+                                    Não existem manutenções para mostrar.
+                                </div>
+                            ) : (
+                                <table className="table table-hover table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Matrícula</th>
+                                            <th>Veículo</th>
+                                            <th>Tipo Manutenção</th>
+                                            <th>Próxima Data</th>
+                                            <th>Ação</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {manutencoes
+                                        .filter(manutencao => new Date(manutencao.proxima_manutencao) >= new Date())
+                                        .sort((a, b) => new Date(a.proxima_manutencao) - new Date(b.proxima_manutencao))
+                                        .slice(0, 5)
+                                        .map((manutencao) => (
+                                            <tr key={manutencao.id}>
+                                                <td>{manutencao.veiculo_manutencao.matricula}</td>
+                                                <td>{manutencao.veiculo_manutencao.marca} {manutencao.veiculo_manutencao.modelo}</td>
+                                                <td>{manutencao.tipo_de_manutencao}</td>
+                                                <td>{manutencao.proxima_manutencao}</td>
+                                                <td>
+                                                    <Link
+                                                        to={`/manutencao/${manutencao.id}`}
+                                                        className="btn btn-sm btn-info"
+                                                        title="Ver Detalhes">
+                                                            <i className="bi bi-eye"></i> Detalhes
+                                                    </Link>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            )}
+                        </div>
+                        <em className="text-muted small">Acompanhe as próximas manutenções.</em>
+                    </div>
+                </div>
+            </div>
+        </>
+    )
+}
+
+export default HomePage;
