@@ -1,0 +1,95 @@
+import {Routes, Route} from 'react-router-dom'
+import Navbar from './components/navbar/navbar'
+import Footer from './components/footer/footer'
+import HomePage from './pages/index'
+import PageNotFound from './components/PageNotFound/PageNotFound'
+import Login from './components/login/login'
+import Register from './components/register/register'
+import ProtectedRoute from './components/ProtectedRoute'
+
+/* Veículos */
+import ListarVeiculos from './pages/veiculos/list'
+import VerVeiculo from './pages/veiculos/view'
+import CriarVeiculo from './pages/veiculos/create'
+import EditarVeiculo from './pages/veiculos/edit'
+
+/* Condutores */
+import ListarCondutores from './pages/condutores/list'
+import VerCondutor from './pages/condutores/view'
+import CriarCondutor from './pages/condutores/create'
+import EditarCondutor from './pages/condutores/edit'
+
+/* Cargas */
+import ListarCargas from './pages/cargas/list'
+import VerCarga from './pages/cargas/view'
+import CriarCarga from './pages/cargas/create'
+import EditarCarga from './pages/cargas/edit'
+
+/* Manutençoes */
+import ListarManutencoes from './pages/manutencoes/list'
+import VerManutencao from './pages/manutencoes/view'
+import CriarManutencao from './pages/manutencoes/create'
+import EditarManutencao from './pages/manutencoes/edit'
+
+/* Pagamentos */
+import ListarPagamentos from './pages/pagamentos/list'
+import VerPagamento from './pages/pagamentos/view'
+import CriarPagamento from './pages/pagamentos/create'
+import EditarPagamento from './pages/pagamentos/edit'
+
+function App() {
+  return (
+    <>
+    <div className="d-flex flex-column min-vh-100">
+      <Navbar />
+      <div className="flex-grow-1 d-flex flex-column justify-content-center">
+        <Routes>
+          <Route path="/" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+
+          {/* Rotas protegidas */}
+          <Route element={<ProtectedRoute />}>
+              <Route path="/dashboard" element={<HomePage />} />
+
+              {/* Rotas dos Veículos */}
+              <Route path="/veiculos" element={<ListarVeiculos />} />
+              <Route path="/veiculo/:id" element={<VerVeiculo />} />
+              <Route path="/veiculo/create" element={<CriarVeiculo />} />
+              <Route path="/veiculo/edit/:id" element={<EditarVeiculo />} />
+
+              {/* Rotas dos Condutores */}
+              <Route path="/condutores" element={<ListarCondutores />} />
+              <Route path="/condutor/:id" element={<VerCondutor />} />
+              <Route path="/condutor/create" element={<CriarCondutor />} />
+              <Route path="/condutor/edit/:id" element={<EditarCondutor />} />
+
+              {/* Rotas das Cargas */}
+              <Route path="/cargas" element={<ListarCargas />} />
+              <Route path="/carga/:id" element={<VerCarga />} />
+              <Route path="/carga/create" element={<CriarCarga />} />
+              <Route path="/carga/edit/:id" element={<EditarCarga />} />
+
+              {/* Rotas das Manutenções */}
+              <Route path="/manutencoes" element={<ListarManutencoes />} />
+              <Route path="/manutencao/:id" element={<VerManutencao />} />
+              <Route path="/manutencao/create" element={<CriarManutencao />} />
+              <Route path="/manutencao/edit/:id" element={<EditarManutencao />} />
+
+              {/* Rotas dos Pagamentos */}
+              <Route path="/pagamentos" element={<ListarPagamentos />} />
+              <Route path="/pagamento/:id" element={<VerPagamento />} />
+              <Route path="/pagamento/create" element={<CriarPagamento />} />
+              <Route path="/pagamento/edit/:id" element={<EditarPagamento />} />
+            </Route>
+
+          {/* Rota para página não encontrada */}
+          <Route path="*" element={<PageNotFound />} />
+        </Routes>
+      </div>
+      <Footer />
+    </div>
+    </>
+  )
+}
+
+export default App
