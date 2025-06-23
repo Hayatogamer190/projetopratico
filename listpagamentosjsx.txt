@@ -1,0 +1,174 @@
+import { useEffect, useState, useContext } from 'react';
+import { Link } from 'react-router-dom';
+import { AuthContext } from "../../contexts/AuthContext";
+import axios from 'axios';
+
+const ListarPagamentos = () => {
+
+    const [pagamentos, setPagamentos] = useState([]);
+    const [success, setSuccess] = useState(false);
+    const [error, setError] = useState("");
+
+    const { token } = useContext(AuthContext);
+
+    useEffect(() => {
+        axios.get("http://localhost:5000/api/v1/pagamentos", {
+            headers: {
+                Authorization: token ? `Bearer ${token}` : undefined,
+            },
+        })
+        .then((res) => {
+            if (res.data.status) {
+                setPagamentos(res.data.data);
+            } else {
+                setError("Ocorreu um erro na execução do pedido.");
+            }
+        })
+        .catch((error) => {
+            setError("Erro na ligação à API. " + error.message);
+        });
+    }, [token]);
+
+    const [pagamentoToDelete, setPagamentoToDelete] = useState(null);
+
+    const deletePagamento = (id) => {
+        axios.delete(`http://localhost:5000/api/v1/pagamento/${id}`, {
+            headers: {
+                Authorization: token ? `Bearer ${token}` : undefined,
+            },
+        })
+        .then((res) => {
+            if (res.status === 204) {
+                setSuccess(true);
+                setPagamentos((prevPagamentos) =>
+                    prevPagamentos.filter((pagamento) => pagamento.id !== id)
+                );
+            } else {
+                setError("Ocorreu um erro ao eliminar a carga.");
+            }     
+        })
+        .catch((error) => {
+            setError("Erro na ligação à API. " + error.message);
+            console.error("Erro ao eliminar pagamento:", error);
+        })
+    };
+
+    return (
+        <>
+            <div className="container py-4">
+                <header className="d-flex justify-content-between align-items-center mb-4">
+                    <h1 className="mb-0"><i className="bi bi-credit-card-fill"></i> Lista de Pagamentos</h1>
+                    <a href="/pagamento/create" className="btn btn-success">
+                        <i className="bi bi-plus-circle-fill"></i> Registar Novo Pagamento
+                    </a>
+                </header>
+                {success && (
+                    <div className="alert alert-success alert-dismissible fade show text-center mb-4" role="alert">
+                        <i className="bi bi-check-circle-fill me-2"></i>
+                        Pagamento eliminado com sucesso!
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                )}
+                {error && (
+                    <div className="alert alert-danger alert-dismissible fade show text-center mb-4" role="alert">
+                        <i className="bi bi-exclamation-triangle-fill me-2"></i>
+                        {error}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                )}
+                <div className="card shadow-sm">
+                    <div className="card-header py-3">
+                        <h5 className="mb-0"><i className="bi bi-table"></i> Pagamentos Registados</h5>
+                    </div>
+                    <div className="card-body">
+                        <div className="table-responsive">
+                            {pagamentos.length === 0 ? (
+                                <div className="alert alert-info" role="alert">
+                                    Não existem cargas para mostrar.
+                                </div>
+                            ) : (
+                                <table className="table table-hover table-sm align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Veículo (Matrícula)</th>
+                                            <th>Tipo de Pagamento</th>
+                                            <th>Valor</th>
+                                            <th>Data Vencimento</th>
+                                            <th>Estado</th>
+                                            <th className="text-end">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {pagamentos.map((pagamento) => (
+                                            <tr key={pagamento.id}>
+                                                <td>{pagamento.id}</td>
+                                                <td>{pagamento.veiculo_pagamento.marca} {pagamento.veiculo_pagamento.modelo} - ({pagamento.veiculo_pagamento.matricula})</td>
+                                                <td>{pagamento.tipo_de_pagamento}</td>
+                                                <td>{pagamento.valor} €</td>
+                                                <td>{pagamento.data_vencimento}</td>
+                                                <td>
+                                                    {
+                                                        pagamento.estado === 'Pago' ? <span className="badge text-bg-success">Pago</span> :
+                                                        pagamento.estado === 'Pendente' ? <span className="badge text-bg-warning">Pendente</span> :
+                                                        pagamento.estado === 'Vencido' ? <span className="badge text-bg-danger">Vencido</span> :
+                                                        <span className="badge text-bg-light">Desconhecido</span>
+                                                    }
+                                                </td>
+                                                <td className="text-end">
+                                                    <Link
+                                                        to={`/pagamento/${pagamento.id}`}
+                                                        className="btn btn-sm btn-outline-info me-1"
+                                                        title="Ver Detalhes">
+                                                            <i className="bi bi-eye"></i>
+                                                    </Link>
+                                                    <Link
+                                                        to={`/pagamento/edit/${pagamento.id}`}
+                                                        className="btn btn-sm btn-outline-primary me-1"
+                                                        title="Editar">
+                                                            <i className="bi bi-pencil"></i>
+                                                    </Link>
+                                                    <button
+                                                        className="btn btn-sm btn-outline-danger"
+                                                        title="Eliminar"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#deleteModal" 
+                                                        onClick={() => setPagamentoToDelete(pagamento)}>
+                                                            <i className="bi bi-trash"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            )}
+                        </div>
+                    </div>
+                    <div className="card-footer text-center">
+                        <small className="text-muted">Fim da lista. Existem {pagamentos.length} pagamentos registados.</small>
+                    </div>
+                </div>
+            </div>
+            <div className="modal fade" id="deleteModal" tabIndex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                <div className="modal-dialog" role="document">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h5 className="modal-title" id="deleteModalLabel">Eliminar Pagamento</h5>
+                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div className="modal-body">
+                            <p>Tem a certeza que deseja eliminar o pagamento ID: <strong>{pagamentoToDelete?.id} - ({pagamentoToDelete?.tipo_de_pagamento})</strong>?</p>
+                            <p className="text-danger">Esta ação não pode ser revertida.</p>
+                        </div>
+                        <div className="modal-footer">
+                            <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="button" className="btn btn-danger" data-bs-dismiss="modal" onClick={() => deletePagamento(pagamentoToDelete.id)}>Eliminar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </>
+    );
+};
+
+export default ListarPagamentos;
