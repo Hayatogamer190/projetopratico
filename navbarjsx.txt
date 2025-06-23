@@ -1,0 +1,92 @@
+import React, { useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../../contexts/AuthContext';
+
+const Navbar = () => {
+
+    const { token, logout } = useContext(AuthContext);
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+        logout();
+        navigate('/');
+    };
+
+    return (
+        <>
+            <nav className="navbar navbar-expand-lg bg-body-tertiary">
+                <div className="container-fluid">
+                    <a className="navbar-brand" href="/dashboard">
+                        <img src="/speedometer2.svg" width="30" height="30" className="d-inline-block align-top" alt="Logo"></img>
+                        &nbsp;Gestor de Frota
+                    </a>
+                    <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                        <span className="navbar-toggler-icon"></span>
+                    </button>
+                    <div className="collapse navbar-collapse" id="navbarNav">
+                        <ul className="navbar-nav mx-auto">
+                            <li className="nav-item">
+                                <a className="nav-link active" aria-current="page" href="/dashboard">Início</a>
+                            </li>
+                            <li className="nav-item dropdown">
+                                <a className="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Veículos
+                                </a>
+                                <div className="dropdown-menu" aria-labelledby="navbarDropdown">
+                                    <a className="dropdown-item" href="/veiculos">Listar</a>
+                                    <a className="dropdown-item" href="/veiculo/create">Criar novo</a>
+                                </div>
+                            </li>
+                            <li className="nav-item dropdown">
+                                <a className="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Condutores
+                                </a>
+                                <div className="dropdown-menu" aria-labelledby="navbarDropdown">
+                                    <a className="dropdown-item" href="/condutores">Listar</a>
+                                    <a className="dropdown-item" href="/condutor/create">Criar novo</a>
+                                </div>
+                            </li>
+                            <li className="nav-item dropdown">
+                                <a className="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Cargas
+                                </a>
+                                <div className="dropdown-menu" aria-labelledby="navbarDropdown">
+                                    <a className="dropdown-item" href="/cargas">Listar</a>
+                                    <a className="dropdown-item" href="/carga/create">Criar novo</a>
+                                </div>
+                            </li>
+                            <li className="nav-item dropdown">
+                                <a className="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Manutenções
+                                </a>
+                                <div className="dropdown-menu" aria-labelledby="navbarDropdown">
+                                    <a className="dropdown-item" href="/manutencoes">Listar</a>
+                                    <a className="dropdown-item" href="/manutencao/create">Criar novo</a>
+                                </div>
+                            </li>
+                            <li className="nav-item dropdown">
+                                <a className="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Pagamentos
+                                </a>
+                                <div className="dropdown-menu" aria-labelledby="navbarDropdown">
+                                    <a className="dropdown-item" href="/pagamentos">Listar</a>
+                                    <a className="dropdown-item" href="/pagamento/create">Criar novo</a>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    { token && (
+                        <div className="d-flex ms-auto">
+                            <button className="btn btn-outline-danger" onClick={handleLogout} type="button">
+                                <i className="bi bi-box-arrow-right"></i> Logout
+                            </button>
+                        </div>
+                    )}
+                </div>
+            </nav>
+        </>
+    );
+};
+
+export default Navbar;
