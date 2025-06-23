@@ -1,0 +1,222 @@
+-- phpMyAdmin SQL Dump
+-- version 5.2.1
+-- https://www.phpmyadmin.net/
+--
+-- Host: 127.0.0.1:3306
+-- Generation Time: Jun 23, 2025 at 07:10 PM
+-- Server version: 9.1.0
+-- PHP Version: 8.3.14
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
+--
+-- Database: `transportes`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `carga`
+--
+
+DROP TABLE IF EXISTS `carga`;
+CREATE TABLE IF NOT EXISTS `carga` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `veiculo` int DEFAULT NULL,
+  `tipo_de_carga` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `peso` decimal(10,2) NOT NULL,
+  `local_origem` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `local_destino` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `data_carga` date NOT NULL,
+  `frequencia` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `ID_Veiculo` (`veiculo`)
+) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `carga`
+--
+
+INSERT INTO `carga` (`id`, `veiculo`, `tipo_de_carga`, `peso`, `local_origem`, `local_destino`, `data_carga`, `frequencia`) VALUES
+(1, 1, 'Material de Escritório', 50.50, 'Lisboa', 'Porto', '2025-04-05', 'Única'),
+(13, 1, 'Documentos', 10.20, 'Sintra', 'Cascais', '2025-06-10', 'Única'),
+(20, 2, 'Documentos', 10.20, 'Sintra', 'Cascais', '2025-06-10', 'Semestral'),
+(24, 1, 'asd', 12.00, 'Sintra', 'Cascais', '2025-06-10', 'Única');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `condutor`
+--
+
+DROP TABLE IF EXISTS `condutor`;
+CREATE TABLE IF NOT EXISTS `condutor` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `nome` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `carta_de_conducao` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `contacto` int NOT NULL,
+  `veiculo_atual` int DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `Numero_Identificacao` (`carta_de_conducao`),
+  KEY `Veiculo_Atual` (`veiculo_atual`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `condutor`
+--
+
+INSERT INTO `condutor` (`id`, `nome`, `carta_de_conducao`, `contacto`, `veiculo_atual`) VALUES
+(1, 'Maria Santos', 'P-789012', 934567890, 1),
+(3, 'João Silva', 'L-123456', 912345678, NULL),
+(5, 'Bárbara Carvalho', 'L-152458', 912345678, NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `manutencao`
+--
+
+DROP TABLE IF EXISTS `manutencao`;
+CREATE TABLE IF NOT EXISTS `manutencao` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `veiculo` int DEFAULT NULL,
+  `tipo_de_manutencao` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `custo` decimal(10,2) NOT NULL,
+  `data_manutencao` date NOT NULL,
+  `proxima_manutencao` date NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `ID_Veiculo` (`veiculo`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `manutencao`
+--
+
+INSERT INTO `manutencao` (`id`, `veiculo`, `tipo_de_manutencao`, `custo`, `data_manutencao`, `proxima_manutencao`) VALUES
+(1, 1, 'Mudança de Óleo e Filtros', 120.50, '2025-03-10', '2026-03-10'),
+(2, 1, 'Mudança de Pneus', 120.00, '2025-06-10', '2025-11-11'),
+(3, 1, 'Revisão Geral', 250.00, '2025-06-02', '2026-06-02');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `pagamento`
+--
+
+DROP TABLE IF EXISTS `pagamento`;
+CREATE TABLE IF NOT EXISTS `pagamento` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `veiculo` int DEFAULT NULL,
+  `tipo_de_pagamento` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `valor` decimal(10,2) NOT NULL,
+  `data_vencimento` date NOT NULL,
+  `estado` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `ID_Veiculo` (`veiculo`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `pagamento`
+--
+
+INSERT INTO `pagamento` (`id`, `veiculo`, `tipo_de_pagamento`, `valor`, `data_vencimento`, `estado`) VALUES
+(1, 1, 'Seguro Anual', 350.00, '2025-06-15', 'Pago'),
+(2, 1, 'IUC', 145.00, '2025-07-31', 'Pendente'),
+(3, 1, 'Manutenção', 150.00, '2025-06-02', 'Vencido');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `user`
+--
+
+DROP TABLE IF EXISTS `user`;
+CREATE TABLE IF NOT EXISTS `user` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `email` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `password` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `createdAt` datetime NOT NULL,
+  `updatedAt` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `user`
+--
+
+INSERT INTO `user` (`id`, `email`, `password`, `createdAt`, `updatedAt`) VALUES
+(2, 'tiagoneves@ismt.pt', '$2b$10$o7cCh5L/IaA.0mMY5KpOZ.mGqnhne9qRpfJZS86lXhkJCETH.EZ1W', '2025-06-23 16:48:40', '2025-06-23 16:48:40');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `veiculo`
+--
+
+DROP TABLE IF EXISTS `veiculo`;
+CREATE TABLE IF NOT EXISTS `veiculo` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `tipo` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `marca` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `modelo` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `ano` int NOT NULL,
+  `matricula` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `localidade` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `estado` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `ultima_manutencao` date NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `Placa` (`matricula`)
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `veiculo`
+--
+
+INSERT INTO `veiculo` (`id`, `tipo`, `marca`, `modelo`, `ano`, `matricula`, `localidade`, `estado`, `ultima_manutencao`) VALUES
+(1, 'Ligeiro Passageiros', 'Mercedes', 'A200', 2020, 'AA-11-BB', 'Lisboa', 'Operacional', '2025-06-22'),
+(2, 'Ligeiro Passageiros', 'Opel', 'Corsa', 2019, 'CC-22-DD', 'Porto', 'Em Manutenção', '2025-06-22'),
+(3, 'Ligeiro Passageiros', 'Renault', 'Clio', 2010, 'KK-66-LL', 'Leiria', 'Vendido', '2025-06-22'),
+(4, 'Ligeiro Mercadorias', 'Ford', 'Transit', 2015, 'II-55-JJ', 'Faro', 'Fora de Serviço', '2025-06-22'),
+(14, 'Pesado Mercadorias', 'Scania', 'P', 2010, 'AA-22-BB', 'Lisboa', 'Operacional', '2025-06-02');
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `carga`
+--
+ALTER TABLE `carga`
+  ADD CONSTRAINT `carga_ibfk_1` FOREIGN KEY (`veiculo`) REFERENCES `veiculo` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT;
+
+--
+-- Constraints for table `condutor`
+--
+ALTER TABLE `condutor`
+  ADD CONSTRAINT `condutor_ibfk_1` FOREIGN KEY (`veiculo_atual`) REFERENCES `veiculo` (`id`) ON DELETE SET NULL;
+
+--
+-- Constraints for table `manutencao`
+--
+ALTER TABLE `manutencao`
+  ADD CONSTRAINT `manutencao_ibfk_1` FOREIGN KEY (`veiculo`) REFERENCES `veiculo` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `pagamento`
+--
+ALTER TABLE `pagamento`
+  ADD CONSTRAINT `pagamento_ibfk_1` FOREIGN KEY (`veiculo`) REFERENCES `veiculo` (`id`) ON DELETE CASCADE;
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
