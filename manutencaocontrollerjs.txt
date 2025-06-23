@@ -1,0 +1,137 @@
+const { Manutencao } = require("../models");
+
+const endpointsFunction = {};
+
+endpointsFunction.getAllManutencoes = async (req, res) => {
+  try {
+    const dados = await Manutencao.findAll({
+        include: 'veiculo_manutencao'
+    });
+
+    res.status(200).json({
+      status: "success",
+      message: "Lista de manutenções.",
+      data: dados,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "Ocorreu um erro ao listar manutenções.",
+      data: null,
+    });
+  }
+};
+
+endpointsFunction.createManutencao = async (req, res) => {
+  const { veiculo, tipo_de_manutencao, custo, data_manutencao, proxima_manutencao } = req.body;
+  console.log( veiculo, tipo_de_manutencao, custo, data_manutencao, proxima_manutencao );
+  try {
+    const dados = await Manutencao.create({
+      veiculo: veiculo,
+      tipo_de_manutencao: tipo_de_manutencao,
+      custo: custo,
+      data_manutencao: data_manutencao,
+      proxima_manutencao: proxima_manutencao
+    });
+
+    res.status(201).json({
+      status: "success",
+      message: "Manutenção criada com sucesso.",
+      data: dados,
+    });
+  } catch (error) {
+    res.status(404).json({
+      status: "error",
+      message: "Ocorreu um erro ao criar manutenção.",
+      data: null,
+    });
+  }
+};
+
+endpointsFunction.getManutencaoById = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const dados = await Manutencao.findOne({
+      where: { id: id },
+      include: 'veiculo_manutencao'
+    });
+    if (!dados) {
+      return res.status(404).json({
+        status: "error",
+        message: "Manutenção não encontrada.",
+      });
+    }
+
+    res.status(200).json({
+      status: "success",
+      message: "Manutenção encontrada com sucesso.",
+      data: dados,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "Ocorreu um erro ao listar manutenção.",
+      data: null,
+    });
+  }
+};
+
+endpointsFunction.updateManutencao = async (req, res) => {
+  const { id } = req.params;
+  const { veiculo, tipo_de_manutencao, custo, data_manutencao, proxima_manutencao } = req.body;
+
+  try {
+    const dados = await Manutencao.update(
+      {
+        veiculo: veiculo,
+        tipo_de_manutencao: tipo_de_manutencao,
+        custo: custo,
+        data_manutencao: data_manutencao,
+        proxima_manutencao: proxima_manutencao
+      },
+      {
+        where: { id: id },
+      }
+    );
+    if (!dados) {
+      return res.status(404).json({
+        status: "error",
+        message: "Manutenção não encontrada.",
+      });
+    }
+    res.status(200).json({
+      status: "success",
+      message: "Manutenção atualizada com sucesso.",
+      data: dados,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "Ocorreu um erro ao atualizar manutenção.",
+      data: null,
+    });
+  }
+};
+
+endpointsFunction.deleteManutencao = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const dados = await Manutencao.destroy({
+      where: { id: id },
+    });
+
+    res.status(204).json({
+      status: "success",
+      message: "Manutenção apagada com sucesso.",
+      data: dados,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "Ocorreu um erro ao apagar manutenção.",
+      data: null,
+    });
+  }
+};
+
+module.exports = endpointsFunction;
