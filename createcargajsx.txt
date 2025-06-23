@@ -1,0 +1,145 @@
+import { useEffect, useState, useContext } from "react";
+import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../../contexts/AuthContext";
+import axios from "axios";
+
+const CriarCarga = () => {
+
+    const [carga, setCarga] = useState({ veiculo: "", tipo_de_carga: "", peso: "", local_origem: "", local_destino: "", data_carga: "", frequencia: "" });
+    const [veiculos, setVeiculos] = useState([]);
+    const [success, setSuccess] = useState(false);
+    const [error, setError] = useState("");
+
+    const nav = useNavigate();
+    const { token } = useContext(AuthContext);
+
+    useEffect(() => {
+        axios.get("http://localhost:5000/api/v1/veiculos", {
+            headers: {
+                Authorization: token ? `Bearer ${token}` : undefined,
+            },
+        })
+        .then((res) => {
+            if (res.data.status) {
+                setVeiculos(res.data.data);
+            } else {
+            setError("Ocorreu um erro na execução do pedido.");
+            }
+        })
+        .catch((error) => {
+            setError("Erro na ligação à API. " + error.message);
+        });
+    }, [token]);
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setCarga({ ...carga, [name]: value });
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        axios.post(`http://localhost:5000/api/v1/carga`, carga, {
+            headers: {
+                Authorization: token ? `Bearer ${token}` : undefined,
+            },
+        })
+        .then(() => {
+            setSuccess(true);
+            setTimeout(() => nav("/cargas"), 1500);
+        })
+        .catch((error) => setError(error.response?.data?.message || "Erro ao inserir veículo."));
+    };
+
+    return (
+        <>
+            <main className="container py-4">
+                <header className="mb-4">
+                    <h1 className="mb-0"><i className="bi bi-plus-circle-fill"></i> Adicionar Nova Carga</h1>
+                    <p className="text-muted">Preencha os detalhes da nova carga.</p>
+                </header>
+                {success && (
+                    <div className="alert alert-success alert-dismissible fade show text-center mb-4" role="alert">
+                        <i className="bi bi-check-circle-fill me-2"></i>
+                        Carga inserida com sucesso! A redirecionar para a lista de cargas..
+                        <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                )}
+                {error && (
+                    <div className="alert alert-danger alert-dismissible fade show text-center mb-4" role="alert">
+                        <i className="bi bi-exclamation-triangle-fill me-2"></i>
+                        {error}
+                        <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                )}
+                <div className="card shadow-sm">
+                    <div className="card-body">
+                        <form onSubmit={handleSubmit}>
+                            <div className="row g-3">
+                                <div className="col-md-6">
+                                    <label htmlFor="veiculo" className="form-label">Veículo Associado*</label>
+                                    <select className="form-select" id="veiculo" name="veiculo" value={carga.veiculo}
+                                        onChange={handleChange} required>
+                                        <option value="" disabled>Selecione um veículo...</option>
+                                        {veiculos
+                                            .filter(veiculo =>
+                                                (veiculo.estado === 'Operacional')
+                                            )
+                                            .map((veiculo) => (
+                                                <option key={veiculo.id} value={veiculo.id}>
+                                                    {veiculo.marca} {veiculo.modelo} - ({veiculo.matricula}) - {veiculo.tipo}
+                                                </option>
+                                            ))
+                                        }
+                                    </select>
+                                </div>
+                                <div className="col-md-6">
+                                    <label htmlFor="tipo_de_carga" className="form-label">Tipo de Carga*</label>
+                                    <input type="text" className="form-control" id="tipo_de_carga" name="tipo_de_carga" placeholder="Ex: Paletes de material de construção" value={carga.tipo_de_carga}
+                                        onChange={handleChange} required />
+                                </div>
+                                <div className="col-md-6">
+                                    <label htmlFor="peso" className="form-label">Peso (kg)*</label>
+                                    <input type="number" className="form-control" id="peso" name="peso" step="0.01" placeholder="Ex: 1250.75" value={carga.peso}
+                                        onChange={handleChange} required />
+                                </div>
+                                <div className="col-md-6">
+                                    <label htmlFor="data_carga" className="form-label">Data da Carga/Transporte*</label>
+                                    <input type="date" className="form-control" id="data_carga" name="data_carga" value={carga.data_carga}
+                                        onChange={handleChange} required />
+                                </div>
+                                <div className="col-md-6">
+                                    <label htmlFor="local_origem" className="form-label">Local de Origem*</label>
+                                    <input type="text" className="form-control" id="local_origem" name="local_origem" placeholder="Ex: Armazém Lisboa" value={carga.local_origem}
+                                        onChange={handleChange} required />
+                                </div>
+                                <div className="col-md-6">
+                                    <label htmlFor="local_destino" className="form-label">Local de Destino*</label>
+                                    <input type="text" className="form-control" id="local_destino" name="local_destino" placeholder="Ex: Cliente Porto" value={carga.local_destino}
+                                        onChange={handleChange} required />
+                                </div>
+                                <div className="col-md-12">
+                                    <label htmlFor="frequencia" className="form-label">Frequência*</label>
+                                    <select className="form-select" id="frequencia" name="frequencia" value={carga.frequencia}
+                                        onChange={handleChange} required>
+                                        <option value="" disabled>Selecione a frequência...</option>
+                                        <option value="Única">Única</option>
+                                        <option value="Mensal">Mensal</option>
+                                        <option value="Semestral">Semestral</option>
+                                        <option value="Anual">Anual</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div className="mt-4 pt-3 border-top d-flex justify-content-end">
+                                <a href="/cargas" className="btn btn-outline-secondary me-2"><i className="bi bi-x-circle"></i> Cancelar</a>
+                                <button type="submit" className="btn btn-success"><i className="bi bi-check-circle-fill"></i> Inserir Carga</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </main>
+        </>
+    )
+}
+
+export default CriarCarga;
