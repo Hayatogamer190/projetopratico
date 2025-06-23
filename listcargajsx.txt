@@ -1,0 +1,171 @@
+import { useEffect, useState, useContext } from 'react';
+import { Link } from 'react-router-dom';
+import { AuthContext } from '../../contexts/AuthContext';
+import axios from 'axios';
+
+const ListarCargas = () => {
+
+    const [cargas, setCargas] = useState([]);
+    const [success, setSuccess] = useState(false);
+    const [error, setError] = useState("");
+
+    const { token } = useContext(AuthContext);
+
+    useEffect(() => {
+        axios.get("http://localhost:5000/api/v1/cargas", {
+            headers: {
+                Authorization: token ? `Bearer ${token}` : undefined,
+            },
+        })
+        .then((res) => {
+            if (res.data.status) {
+                setCargas(res.data.data);
+            } else {
+                setError("Ocorreu um erro na execução do pedido.");
+            }
+        })
+        .catch((error) => {
+            setError("Erro na ligação à API. " + error.message);
+        });
+    }, [token]);
+
+    const [cargaToDelete, setCargaToDelete] = useState(null);
+
+    const deleteCarga = (id) => {
+        axios.delete(`http://localhost:5000/api/v1/carga/${id}`, {
+            headers: {
+                Authorization: token ? `Bearer ${token}` : undefined,
+            },
+        })
+        .then((res) => {
+            if (res.status === 204) {
+                setSuccess(true);
+                setCargas((prevCargas) =>
+                    prevCargas.filter((carga) => carga.id !== id)
+                );
+            } else {
+                setError("Ocorreu um erro ao eliminar a carga.");
+            }     
+        })
+        .catch((error) => {
+            setError("Erro na ligação à API. " + error.message);
+            console.error("Erro ao eliminar condutor:", error);
+        })
+    };
+
+    return (
+        <>
+            <div className="container py-4">
+                <header className="d-flex justify-content-between align-items-center mb-4">
+                    <h1 className="mb-0"><i className="bi bi-box-seam-fill"></i> Lista de Cargas</h1>
+                    <a href="/carga/create" className="btn btn-success">
+                        <i className="bi bi-plus-circle-fill"></i> Adicionar Nova Carga
+                    </a>
+                </header>
+                {success && (
+                    <div className="alert alert-success alert-dismissible fade show text-center mb-4" role="alert">
+                        <i className="bi bi-check-circle-fill me-2"></i>
+                        Carga eliminado com sucesso!
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                )}
+                {error && (
+                    <div className="alert alert-danger alert-dismissible fade show text-center mb-4" role="alert">
+                        <i className="bi bi-exclamation-triangle-fill me-2"></i>
+                        {error}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                )}
+                <div className="card shadow-sm">
+                    <div className="card-header py-3">
+                        <h5 className="mb-0"><i className="bi bi-table"></i> Cargas Registadas</h5>
+                    </div>
+                    <div className="card-body">
+                        <div className="table-responsive">
+                            {cargas.length === 0 ? (
+                                <div className="alert alert-info" role="alert">
+                                    Não existem cargas para mostrar.
+                                </div>
+                            ) : (
+                                <table className="table table-hover table-sm align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Tipo de Carga</th>
+                                            <th>Veículo</th>
+                                            <th>Peso (kg)</th>
+                                            <th>Origem</th>
+                                            <th>Destino</th>
+                                            <th>Data</th>
+                                            <th>Frequência</th>
+                                            <th className="text-end">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {cargas.map((carga) => (
+                                            <tr key={carga.id}>
+                                                <td>{carga.id}</td>
+                                                <td>{carga.tipo_de_carga}</td>
+                                                <td>{carga.veiculo_carga.marca} {carga.veiculo_carga.modelo} - ({carga.veiculo_carga.matricula})</td>
+                                                <td>{carga.peso}</td>
+                                                <td>{carga.local_origem}</td>
+                                                <td>{carga.local_destino}</td>
+                                                <td>{carga.data_carga}</td>
+                                                <td>{carga.frequencia}</td>
+                                                <td className="text-end">
+                                                    <Link
+                                                        to={`/carga/${carga.id}`}
+                                                        className="btn btn-sm btn-outline-info me-1"
+                                                        title="Ver Detalhes">
+                                                            <i className="bi bi-eye"></i>
+                                                    </Link>
+                                                    <Link
+                                                        to={`/carga/edit/${carga.id}`}
+                                                        className="btn btn-sm btn-outline-primary me-1"
+                                                        title="Editar">
+                                                            <i className="bi bi-pencil"></i>
+                                                    </Link>
+                                                    <button
+                                                        className="btn btn-sm btn-outline-danger"
+                                                        title="Eliminar"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#deleteModal" 
+                                                        onClick={() => setCargaToDelete(carga)}>
+                                                            <i className="bi bi-trash"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            )}
+                        </div>
+                    </div>
+                    <div className="card-footer text-center">
+                        <small className="text-muted">Fim da lista. Existem {cargas.length} cargas registados.</small>
+                    </div>
+                </div>
+            </div>
+            <div className="modal fade" id="deleteModal" tabIndex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                <div className="modal-dialog" role="document">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h5 className="modal-title" id="deleteModalLabel">Eliminar Carga</h5>
+                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div className="modal-body">
+                            <p>Tem a certeza que deseja eliminar a carga ID: <strong>{cargaToDelete?.id} - ({cargaToDelete?.tipo_de_carga})</strong>?</p>
+                            <p className="text-danger">Esta ação não pode ser revertida.</p>
+                        </div>
+                        <div className="modal-footer">
+                            <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="button" className="btn btn-danger" data-bs-dismiss="modal" onClick={() => deleteCarga(cargaToDelete.id)}>Eliminar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </>
+    );
+};
+
+export default ListarCargas;
