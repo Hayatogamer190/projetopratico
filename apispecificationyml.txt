@@ -1,0 +1,944 @@
+openapi: 3.0.4
+info:
+  title: Gestor de Frota - OpenAPI 3.0
+  description: |-
+    Definição da API em OpenAPI 3 para o Projeto Final da UC de Programação III do curso de Multimédia do ISMT.
+  version: 1.0.12
+servers:
+  - url: http://localhost:5000
+tags:
+  - name: veiculo
+    description: Tudo sobre os veículos
+  - name: condutor
+    description: Tudo sobre os condutores
+  - name: carga
+    description: Tudo sobre as cargas
+  - name: manutencao
+    description: Tudo sobre as manutenções
+  - name: pagamento
+    description: Tudo sobre os pagamentos
+paths:
+  /veiculos:
+    get:
+      tags:
+        - veiculo
+      summary: Lista de veículos
+      operationId: getAllVeiculos
+      responses:
+        '200':
+          description: Veículos obtidos com sucesso
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Veiculo'
+        '500':
+          description: Ocurreu um erro ao executar a operação
+      security:
+        - bearerAuth: []
+        - xAccessTokenAuth: []
+  /veiculo:
+    post:
+      tags:
+        - veiculo
+      summary: Inserir veículo
+      description: Inserir um veículo
+      operationId: createVeiculo
+      requestBody:
+        description: Inserir os dados do veículo
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Veiculo'
+        required: true
+      responses:
+        '201':
+          description: Veículo inserido com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Veiculo'
+        '500':
+          description: Ocurreu um erro ao executar a operação
+      security:
+        - bearerAuth: []
+        - xAccessTokenAuth: []
+  /veiculo/{id}:
+    get:
+      tags:
+        - veiculo
+      summary: Obter veículo através do ID
+      description: Devolve um único veículo
+      operationId: getVeiculoById
+      parameters:
+        - name: id
+          in: path
+          description: ID do veículo a ser devolvido
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Veículo encontrado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Veiculo'
+        '404':
+          description: Veículo não encontrado
+        '500':
+          description: Ocurreu um erro ao executar a operação
+      security:
+        - bearerAuth: []
+        - xAccessTokenAuth: []
+    put:
+      tags:
+        - veiculo
+      summary: Atualizar veículo
+      description: Atualizar um veículo existente por ID
+      operationId: updateVeiculo
+      parameters:
+        - name: id
+          in: path
+          description: ID do veículo a atualizar
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        description: Atualizar um veículo existente
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Veiculo'
+        required: true
+      responses:
+        '200':
+          description: Veículo atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Veiculo'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Veiculo'
+        '404':
+          description: Veículo não encontrado
+        '500':
+          description: Ocurreu um erro ao executar a operação
+      security:
+        - bearerAuth: []
+        - xAccessTokenAuth: []
+    delete:
+      tags:
+        - veiculo
+      summary: Eliminar veículo
+      description: Eliminar veículo
+      operationId: deleteVeiculo
+      parameters:
+        - name: id
+          in: path
+          description: ID do veículo a eliminar
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Veículo eliminado com sucesso
+        '404':
+          description: Veículo não encontrado
+        '500':
+          description: Ocurreu um erro ao executar a operação
+      security:
+        - bearerAuth: []
+        - xAccessTokenAuth: []
+  /condutores:
+    get:
+      tags:
+        - condutor
+      summary: Lista de condutores
+      operationId: getAllCondutores
+      responses:
+        '200':
+          description: Condutores obtidos com sucesso
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Condutor'
+        '500':
+          description: Ocurreu um erro ao executar a operação
+      security:
+        - bearerAuth: []
+        - xAccessTokenAuth: []
+  /condutor:
+    post:
+      tags:
+        - condutor
+      summary: Inserir condutor
+      description: Inserir um condutor
+      operationId: createCondutor
+      requestBody:
+        description: Inserir os dados do condutor
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Condutor'
+        required: true
+      responses:
+        '201':
+          description: Condutor inserido com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Condutor'
+        '500':
+          description: Ocurreu um erro ao executar a operação
+      security:
+        - bearerAuth: []
+        - xAccessTokenAuth: []
+  /condutor/{id}:
+    get:
+      tags:
+        - condutor
+      summary: Obter condutor através do ID
+      description: Devolve um único condutor
+      operationId: getCondutorById
+      parameters:
+        - name: id
+          in: path
+          description: ID do condutor a ser devolvido
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Condutor encontrado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Condutor'
+        '404':
+          description: Condutor não encontrado
+        '500':
+          description: Ocurreu um erro ao executar a operação
+      security:
+        - bearerAuth: []
+        - xAccessTokenAuth: []
+    put:
+      tags:
+        - condutor
+      summary: Atualizar condutor
+      description: Atualizar um condutor existente por ID
+      operationId: updateCondutor
+      parameters:
+        - name: id
+          in: path
+          description: ID do condutor a atualizar
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        description: Atualizar um condutor existente
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Condutor'
+        required: true
+      responses:
+        '200':
+          description: Condutor atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Condutor'
+        '404':
+          description: Condutor não encontrado
+        '500':
+          description: Ocurreu um erro ao executar a operação
+      security:
+        - bearerAuth: []
+        - xAccessTokenAuth: []
+    delete:
+      tags:
+        - condutor
+      summary: Eliminar condutor
+      description: Eliminar condutor
+      operationId: deleteCondutor
+      parameters:
+        - name: id
+          in: path
+          description: ID do condutor a eliminar
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Condutor eliminado com sucesso
+        '404':
+          description: Condutor não encontrado
+        '500':
+          description: Ocurreu um erro ao executar a operação
+      security:
+        - bearerAuth: []
+        - xAccessTokenAuth: []
+  /cargas:
+    get:
+      tags:
+        - carga
+      summary: Lista de cargas
+      operationId: getAllCargas
+      responses:
+        '200':
+          description: Cargas obtidos com sucesso
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Carga'
+        '500':
+          description: Ocurreu um erro ao executar a operação
+      security:
+        - bearerAuth: []
+        - xAccessTokenAuth: []
+  /carga:
+    post:
+      tags:
+        - carga
+      summary: Inserir carga
+      description: Inserir uma carga
+      operationId: createCarga
+      requestBody:
+        description: Inserir os dados da carga
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Carga'
+        required: true
+      responses:
+        '201':
+          description: Carga inserido com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Carga'
+        '500':
+          description: Ocurreu um erro ao executar a operação
+  /carga/{id}:
+    get:
+      tags:
+        - carga
+      summary: Obter carga através do ID
+      description: Devolve uma único carga
+      operationId: getCargaById
+      parameters:
+        - name: id
+          in: path
+          description: ID da carga a ser devolvido
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Carga encontrado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Carga'
+        '404':
+          description: Veículo não encontrado
+        '500':
+          description: Ocurreu um erro ao executar a operação
+      security:
+        - bearerAuth: []
+        - xAccessTokenAuth: []
+    put:
+      tags:
+        - carga
+      summary: Atualizar carga
+      description: Atualizar uma carga existente por ID
+      operationId: updateCarga
+      parameters:
+        - name: id
+          in: path
+          description: ID da carga a atualizar
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        description: Atualizar uma carga existente
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Carga'
+        required: true
+      responses:
+        '200':
+          description: Carga atualizada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Carga'
+        '404':
+          description: Veículo não encontrado
+        '500':
+          description: Ocurreu um erro ao executar a operação
+      security:
+        - bearerAuth: []
+        - xAccessTokenAuth: []
+    delete:
+      tags:
+        - carga
+      summary: Eliminar carga
+      description: Eliminar uma carga
+      operationId: deleteCarga
+      parameters:
+        - name: id
+          in: path
+          description: ID da carga a eliminar
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Carga eliminado com sucesso
+        '404':
+          description: Carga não encontrado
+        '500':
+          description: Ocurreu um erro ao executar a operação
+      security:
+        - bearerAuth: []
+        - xAccessTokenAuth: []
+  /manutencoes:
+    get:
+      tags:
+        - manutencao
+      summary: Lista de manutenções
+      operationId: getAllManutencoes
+      responses:
+        '200':
+          description: Manutenções obtidas com sucesso
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                   $ref: '#/components/schemas/Manutencao'
+        '500':
+          description: Ocurreu um erro ao executar a operação
+      security:
+        - bearerAuth: []
+        - xAccessTokenAuth: []
+  /manutencao:
+    post:
+      tags:
+        - manutencao
+      summary: Inserir manutenção
+      description: Inserir uma manutenção
+      operationId: createManutencao
+      requestBody:
+        description: Inserir os dados da manutenção
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Manutencao'
+        required: true
+      responses:
+        '201':
+          description: Manutenção inserido com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Manutencao'
+        '500':
+          description: Ocurreu um erro ao executar a operação
+      security:
+        - bearerAuth: []
+        - xAccessTokenAuth: []
+  /manutencao/{id}:
+    get:
+      tags:
+        - manutencao
+      summary: Obter manutenção através do ID
+      description: Devolve uma único manutenção
+      operationId: getManutencaoById
+      parameters:
+        - name: id
+          in: path
+          description: ID da manutenção a ser devolvida
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Manutenção encontrada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Manutencao'
+        '404':
+          description: Manutenção não encontrada
+        '500':
+          description: Ocurreu um erro ao executar a operação
+      security:
+        - bearerAuth: []
+        - xAccessTokenAuth: []
+    put:
+      tags:
+        - manutencao
+      summary: Atualizar manutenção
+      description: Atualizar uma manutenção existente por ID
+      operationId: updateManutencao
+      parameters:
+        - name: id
+          in: path
+          description: ID da manutenção a atualizar
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        description: Atualizar uma manutenção existente
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Manutencao'
+        required: true
+      responses:
+        '200':
+          description: Manutenção atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Manutencao'
+        '404':
+          description: Manutenção não encontrado
+        '500':
+          description: Ocurreu um erro ao executar a operação
+      security:
+        - bearerAuth: []
+        - xAccessTokenAuth: []
+    delete:
+      tags:
+        - manutencao
+      summary: Eliminar manutenção
+      description: Eliminar uma manutenção
+      operationId: deleteManutencao
+      parameters:
+        - name: id
+          in: path
+          description: ID da manutenção a eliminar
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Manutenção eliminada com sucesso
+        '404':
+          description: Manutenção não encontrada
+        '500':
+          description: Ocurreu um erro ao executar a operação
+      security:
+        - bearerAuth: []
+        - xAccessTokenAuth: []
+  /pagamentos:
+    get:
+      tags:
+        - pagamento
+      summary: Lista de pagamentos.
+      operationId: getAllPagamentos
+      responses:
+        '200':
+          description: Pagamentos obtidos com sucesso
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Pagamento'
+        '500':
+          description: Ocurreu um erro ao executar a operação
+      security:
+        - bearerAuth: []
+        - xAccessTokenAuth: []
+  /pagamento:
+    post:
+      tags:
+        - pagamento
+      summary: Inserir pagamento
+      description: Inserir um pagamento
+      operationId: createPagamento
+      requestBody:
+        description: Inserir os dados do pagamento
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Pagamento'
+        required: true
+      responses:
+        '201':
+          description: Pagamento inserido com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pagamento'
+        '500':
+          description: Ocurreu um erro ao executar a operação
+      security:
+        - bearerAuth: []
+        - xAccessTokenAuth: []
+  /pagamento/{id}:
+    get:
+      tags:
+        - pagamento
+      summary: Obter pagamento através do ID
+      description: Devolve um único pagamento
+      operationId: getPagamentoById
+      parameters:
+        - name: id
+          in: path
+          description: ID do pagamento a ser devolvido
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Pagamento encontrado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pagamento'
+        '404':
+          description: Pagamento não encontrado
+        '500':
+          description: Ocurreu um erro ao executar a operação
+      security:
+        - bearerAuth: []
+        - xAccessTokenAuth: []
+    put:
+      tags:
+        - pagamento
+      summary: Atualizar pagamento
+      description: Atualizar um pagamento existente por ID
+      operationId: updatePagamento
+      parameters:
+        - name: id
+          in: path
+          description: ID do pagamento a atualizar
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        description: Atualizar um pagamento existente
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Pagamento'
+        required: true
+      responses:
+        '200':
+          description: Pagamento atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pagamento'
+        '404':
+          description: Pagamento não encontrado
+        '500':
+          description: Ocurreu um erro ao executar a operação
+      security:
+        - bearerAuth: []
+        - xAccessTokenAuth: []
+    delete:
+      tags:
+        - pagamento
+      summary: Eliminar pagamento
+      description: Eliminar um pagamento
+      operationId: deletePagamento
+      parameters:
+        - name: id
+          in: path
+          description: ID do pagamento a eliminar
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Pagamento eliminado com sucesso
+        '404':
+          description: Pagamento não encontrado
+        '500':
+          description: Ocurreu um erro ao executar a operação
+      security:
+        - bearerAuth: []
+        - xAccessTokenAuth: []
+components:
+  schemas:
+    Veiculo:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+          example: 10
+          description: ID do Veículo
+        tipo:
+          type: string
+          maxLength: 50
+          description: Tipo de Veículo
+          example: Veículo Ligeiro
+        marca:
+          type: string
+          maxLength: 50
+          description: Marca do Veículo
+          example: Mitsubishi
+        modelo:
+          type: string
+          maxLength: 50
+          description: Modelo do Veículo
+          example: Partner
+        ano:
+          type: integer
+          description: Ano do Veículo
+          example: 1993
+        matricula:
+          type: string
+          maxLength: 20
+          description: Matrícula
+          example: AM-15-AS
+        localidade:
+          type: string
+          maxLength: 100
+          description: Localização do Veículo
+          example: Lisboa
+        estado:
+          type: string
+          maxLength: 50
+          description: Estado do Veículo
+          example: Operacional
+          enum:
+            - Operacional
+            - Manutenção
+        ultima_manutencao:
+          type: string
+          format: date
+          description: Data da Última Manutenção
+          example: '2024-12-10'
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp da Criação
+          readOnly: true
+        updatedAt:
+          type: string
+          format: date-time
+          description: Timestamp do Update
+          readOnly: true
+      xml:
+        name: veiculo
+    Condutor:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID do Condutor
+          example: 8
+          readOnly: true
+        nome:
+          type: string
+          maxLength: 100
+          description: Nome do Condutor
+          example: Tiago
+        carta_de_conducao:
+          type: string
+          maxLength: 50
+          description: Carta de Condução do Condutor
+          example: C-123456 7
+        contacto:
+          type: integer
+          description: Contacto do Condutor
+          example: 912345678
+        veiculo_atual:
+          type: integer
+          nullable: true
+          description: ID do Veículo Atribuído
+          example: 10
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp da Criação
+          readOnly: true
+        updatedAt:
+          type: string
+          format: date-time
+          description: Timestamp do Update
+          readOnly: true
+      xml:
+        name: condutor
+    Carga:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID da Carga
+          example: 5
+          readOnly: true
+        veiculo:
+          type: integer
+          nullable: true
+          description: ID do Veículo Associado
+          example: 10
+        tipo_de_carga:
+          type: string
+          maxLength: 100
+          description: Tipo de Carga
+          example: Material
+        peso:
+          type: number
+          format: float
+          description: Peso da Carga
+          example: 125.15
+        local_origem:
+          type: string
+          maxLength: 100
+          description: Localização de Origem da Carga
+          example: Porto
+        local_destino:
+          type: string
+          maxLength: 100
+          description: Localização de Destino da Carga
+          example: Lisboa
+        data_carga:
+          type: string
+          format: date
+          description: Data de Carregamento da Carga
+          example: 2024-12-18
+        frequencia:
+          type: string
+          maxLength: 50
+          description: Frequência de Carregamento da Carga
+          example: Semestral
+          enum:
+            - Mensal
+            - Semestral
+            - Anual
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp da Criação
+          readOnly: true
+        updatedAt:
+          type: string
+          format: date-time
+          description: Timestamp do Update
+          readOnly: true
+      xml:
+        name: carga
+    Manutencao:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID da Manutenção
+          example: 7
+          readOnly: true
+        veiculo:
+          type: integer
+          nullable: true
+          description: ID do Veículo Associado
+          example: 10
+        tipo_de_manutencao:
+          type: string
+          maxLength: 100
+          description: Tipo de Manutenção
+          example: Mudança de Óleo
+        custo:
+          type: number
+          format: float
+          description: Custo da Manutenção
+          example: 49.99
+        data_manutencao:
+          type: string
+          format: date
+          description: Data da Manutenção
+          example: 2024-12-10
+        proxima_manutencao:
+          type: string
+          format: date
+          description: Próxima Data de Manutenção
+          example: 2025-08-06
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp da Criação
+          readOnly: true
+        updatedAt:
+          type: string
+          format: date-time
+          description: Timestamp do Update
+          readOnly: true
+      xml:
+        name: manutencao
+    Pagamento:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID do Pagamento
+          example: 1
+          readOnly: true
+        veiculo:
+          type: integer
+          nullable: true
+          description: ID do Veículo Associado
+          example: 10
+        tipo_de_pagamento:
+          type: string
+          maxLength: 50
+          description: Tipo de Pagamento
+          example: IUC (Imposto Único de Circulação)
+          enum:
+            - IUC (Imposto Único de Circulação)
+            - Seguro Automóvel
+        valor:
+          type: number
+          format: float
+          description: Valor do Pagamento
+          example: 21.95
+        data_vencimento:
+          type: string
+          format: date
+          description: Data de Vencimento
+          example: 2025-12-17
+        estado:
+          type: string
+          maxLength: 50
+          description: Estado do Pagamento
+          example: Não Pago
+          enum:
+            - Não Pago
+            - Pago
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp da Criação
+          readOnly: true
+        updatedAt:
+          type: string
+          format: date-time
+          description: Timestamp do Update
+          readOnly: true
+      xml:
+        name: pagamento
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT Bearer token for authentication
+    xAccessTokenAuth:
+      type: apiKey
+      in: header
+      name: x-access-token
+      description: API key (JWT) to be placed in the x-access-token header
