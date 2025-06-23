@@ -1,0 +1,19 @@
+import React from "react";
+import { Link } from "react-router-dom";
+
+const PageNotFound = () => {
+  return (
+    <div className="container text-center d-flex flex-column justify-content-center align-items-center vh-100">
+      <h1 className="display-1 fw-bold">404</h1>
+      <p className="fs-3"> <span className="text-danger">Ups!</span> Página não encontrada.</p>
+      <p className="lead">
+        A página que procura não existe ou foi movida.
+      </p>
+      <Link to="/" className="btn btn-primary">
+        Voltar ao Início
+      </Link>
+    </div>
+  );
+};
+
+export default PageNotFound;
