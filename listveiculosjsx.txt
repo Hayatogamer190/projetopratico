@@ -1,0 +1,184 @@
+import { useEffect, useState, useContext } from 'react';
+import { Link } from 'react-router-dom';
+import axios from 'axios';
+import { AuthContext } from '../../contexts/AuthContext';
+
+const ListarVeiculos = () => {
+
+    const [veiculos, setVeiculos] = useState([]);
+    const [success, setSuccess] = useState(false);
+    const [error, setError] = useState("");
+
+    const { token } = useContext(AuthContext);
+
+    useEffect(() => {
+        axios
+            .get("http://localhost:5000/api/v1/veiculos", {
+                headers: {
+                    Authorization: token ? `Bearer ${token}` : undefined,
+                },
+            })
+            .then((res) => {
+                if (res.data.status) {
+                    setVeiculos(res.data.data);
+                } else {
+                    setError("Ocorreu um erro na execução do pedido.");
+                }
+            })
+            .catch((error) => {
+                setError("Erro na ligação à API. " + error.message);
+            });
+    }, [token]);
+
+    const [veiculoToDelete, setVeiculoToDelete] = useState(null);
+
+    const deleteVeiculo = (id) => {
+        axios.delete(`http://localhost:5000/api/v1/veiculo/${id}`, {
+            headers: {
+                Authorization: token ? `Bearer ${token}` : undefined,
+            },
+        })
+            .then((res) => {
+                if (res.status === 204) {
+                    setSuccess(true);
+                    setVeiculos((prevVeiculos) =>
+                        prevVeiculos.filter((veiculo) => veiculo.id !== id)
+                    );
+                } else {
+                    setError("Ocorreu um erro ao eliminar o veículo.");
+                }
+                
+            })
+            .catch((error) => {
+                setError("Erro na ligação à API. " + error.message);
+                console.error("Erro ao eliminar veículo:", error);
+            })
+    };
+
+    return (
+        <>
+            <div className="container my-4">
+                <header className="d-flex justify-content-between align-items-center mb-4">
+                    <h1 className="mb-0"><i className="bi bi-truck"></i> Lista de Veículos</h1>
+                    <a href="/veiculo/create" className="btn btn-success">
+                        <i className="bi bi-plus-circle-fill"></i> Adicionar Novo Veículo
+                    </a>
+                </header>
+
+                {success && (
+                    <div className="alert alert-success alert-dismissible fade show text-center mb-4" role="alert">
+                        <i className="bi bi-check-circle-fill me-2"></i>
+                        Veículo eliminado com sucesso!
+                        <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                )}
+                {error && (
+                    <div className="alert alert-danger alert-dismissible fade show text-center mb-4" role="alert">
+                        <i className="bi bi-exclamation-triangle-fill me-2"></i>
+                        {error}
+                        <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                )}
+
+                <div className="card shadow-sm mb-4">
+                    <div className="card-header py-3">
+                        <h5 className="mb-0"><i className="bi bi-table"></i> Veículos Registados</h5>
+                    </div>
+                    <div className="card-body">
+                        <div className="table-responsive">
+                            {veiculos.length === 0 ? (
+                                <div className="alert alert-info" role="alert">
+                                    Não existem veiculos para mostrar.
+                                </div>
+                            ) : (
+                                <table className="table table-hover table-sm align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Tipo</th>
+                                            <th>Marca</th>
+                                            <th>Modelo</th>
+                                            <th>Ano</th>
+                                            <th>Matrícula</th>
+                                            <th>Localidade</th>
+                                            <th>Estado</th>
+                                            <th className="text-end">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {veiculos.map((veiculo) => (
+                                            <tr key={veiculo.id}>
+                                                <td>{veiculo.id}</td>
+                                                <td>{veiculo.tipo}</td>
+                                                <td>{veiculo.marca}</td>
+                                                <td>{veiculo.modelo}</td>
+                                                <td>{veiculo.ano}</td>
+                                                <td>{veiculo.matricula}</td>
+                                                <td>{veiculo.localidade}</td>
+                                                <td>
+                                                    {
+                                                        veiculo.estado === 'Operacional' ? <span className="badge text-bg-success">Operacional</span> :
+                                                        veiculo.estado === 'Em Manutenção' ? <span className="badge text-bg-warning">Em Manutenção</span> :
+                                                        veiculo.estado === 'Vendido' ? <span className="badge text-bg-secondary">Vendido</span> :
+                                                        veiculo.estado === 'Fora de Serviço' ? <span className="badge text-bg-danger">Fora de Serviço</span> :
+                                                        veiculo.estado === 'Abatido' ? <span className="badge text-bg-dark">Abatido</span> :
+                                                        <span className="badge text-bg-light">Desconhecido</span>
+                                                    }
+                                                </td>
+                                                <td className="text-end">
+                                                    <Link
+                                                        to={`/veiculo/${veiculo.id}`}
+                                                        className="btn btn-sm btn-outline-info me-1"
+                                                        title="Ver Detalhes">
+                                                            <i className="bi bi-eye"></i>
+                                                    </Link>
+                                                    <Link
+                                                        to={`/veiculo/edit/${veiculo.id}`}
+                                                        className="btn btn-sm btn-outline-primary me-1"
+                                                        title="Editar">
+                                                            <i className="bi bi-pencil"></i>
+                                                    </Link>
+                                                    <button
+                                                        className="btn btn-sm btn-outline-danger"
+                                                        title="Eliminar"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#deleteModal" 
+                                                        onClick={() => setVeiculoToDelete(veiculo)}>
+                                                            <i className="bi bi-trash"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            )}
+                        </div>
+                    </div>
+                    <div className="card-footer text-center">
+                        <small className="text-muted">Fim da lista. Existem {veiculos.length} veículos registados.</small>
+                    </div>
+                </div>
+            </div>
+            <div className="modal fade" id="deleteModal" tabIndex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                <div className="modal-dialog" role="document">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h5 className="modal-title" id="deleteModalLabel">Eliminar Veículo</h5>
+                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div className="modal-body">
+                            <p>Tem a certeza que deseja eliminar o veículo <strong>{veiculoToDelete?.marca} {veiculoToDelete?.modelo} - ({veiculoToDelete?.matricula})</strong>?</p>
+                            <p className="text-danger">Esta ação não pode ser revertida.</p>
+                        </div>
+                        <div className="modal-footer">
+                            <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="button" className="btn btn-danger" data-bs-dismiss="modal" onClick={() => deleteVeiculo(veiculoToDelete.id)}>Eliminar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </>
+    );
+};
+
+export default ListarVeiculos;
