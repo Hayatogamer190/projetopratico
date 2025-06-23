@@ -1,0 +1,124 @@
+import { useEffect, useState, useContext } from "react";
+import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../../contexts/AuthContext";
+import axios from "axios";
+
+const CriarCondutor = () => {
+    const [condutor, setCondutor] = useState({ nome: "", carta_de_conducao: "", contacto: "", veiculo: "" });
+    const [veiculos, setVeiculos] = useState([]);
+    const [success, setSuccess] = useState(false);
+    const [error, setError] = useState("");
+
+    const nav = useNavigate();
+    const { token } = useContext(AuthContext);
+
+    useEffect(() => {
+        axios.get("http://localhost:5000/api/v1/veiculos", {
+            headers: {
+                Authorization: token ? `Bearer ${token}` : undefined,
+            },
+        })
+        .then((res) => {
+            if (res.data.status) {
+                setVeiculos(res.data.data);
+            } else {
+                setError("Ocorreu um erro na execução do pedido.");
+            }
+        })
+        .catch((error) => {
+            setError("Erro na ligação à API. " + error.message);
+        });
+    }, [token]);
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setCondutor({ ...condutor, [name]: value });
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        axios.post(`http://localhost:5000/api/v1/condutor`, condutor, {
+            headers: {
+                Authorization: token ? `Bearer ${token}` : undefined,
+            },
+        })
+        .then(() => {
+            setSuccess(true);
+            setTimeout(() => nav("/condutores"), 1500);
+        })
+        .catch((error) => setError(error.response?.data?.message || "Erro ao inserir veículo."));
+    };
+
+    return (
+        <>
+            <div className="container py-4">
+                <header className="mb-4">
+                    <h1 className="mb-0"><i className="bi bi-person-plus-fill"></i> Adicionar Novo Condutor</h1>
+                    <p className="text-muted">Preencha os dados do novo condutor.</p>
+                </header>
+                {success && (
+                    <div className="alert alert-success alert-dismissible fade show text-center mb-4" role="alert">
+                        <i className="bi bi-check-circle-fill me-2"></i>
+                        Condutor guardado com sucesso! A redirecionar para a lista de condutores..
+                        <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                )}
+                {error && (
+                    <div className="alert alert-danger alert-dismissible fade show text-center mb-4" role="alert">
+                        <i className="bi bi-exclamation-triangle-fill me-2"></i>
+                        {error}
+                        <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                )}
+                <div className="card shadow-sm">
+                    <div className="card-body">
+                        <form onSubmit={handleSubmit}>
+                            <div className="row g-3">
+                                <div className="col-md-12">
+                                    <label htmlFor="nome" className="form-label">Nome Completo*</label>
+                                    <input type="text" className="form-control" id="nome" name="nome" placeholder="Insira o nome completo" value={condutor.nome} 
+                                        onChange={handleChange} required />
+                                </div>
+                                <div className="col-md-6">
+                                    <label htmlFor="carta_de_conducao" className="form-label">Nº da Carta de Condução*</label>
+                                    <input type="text" className="form-control" id="carta_de_conducao" name="carta_de_conducao" placeholder="Ex: L-123456" value={condutor.carta_de_conducao} 
+                                        onChange={handleChange} required />
+                                </div>
+                                <div className="col-md-6">
+                                    <label htmlFor="contacto" className="form-label">Contacto Telefónico*</label>
+                                    <input type="tel" className="form-control" id="contacto" name="contacto" placeholder="Ex: 912345678" value={condutor.contacto} 
+                                        onChange={handleChange} required />
+                                </div>
+                                <div className="col-md-12">
+                                    <label htmlFor="veiculo_atual" className="form-label">Veículo Atribuído</label>
+                                    <select className="form-select" id="veiculo_atual" name="veiculo_atual" value={condutor.veiculo_atual}
+                                        onChange={handleChange} >
+                                            <option value="">Disponível</option>
+                                            {veiculos
+                                                .filter(veiculo =>
+                                                    (!veiculo.condutor && veiculo.estado === 'Operacional')
+                                                )
+                                                .map((veiculo) => (
+                                                    <option key={veiculo.id} value={veiculo.id}>
+                                                        {veiculo.marca} {veiculo.modelo} - ({veiculo.matricula}) - {veiculo.tipo}
+                                                    </option>
+                                                ))
+                                            }
+                                    </select>
+                                        <small className="form-text text-muted">Pode selecionar um veículo se disponíveis.</small>
+                                </div>
+                            </div>
+
+                            <div className="mt-4 pt-3 border-top d-flex justify-content-end">
+                                <a href="/condutores" className="btn btn-outline-secondary me-2"><i className="bi bi-x-circle"></i> Cancelar</a>
+                                <button type="submit" className="btn btn-success"><i className="bi bi-check-circle-fill"></i> Guardar Condutor</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </>
+    )
+}
+
+export default CriarCondutor;
