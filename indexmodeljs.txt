@@ -1,0 +1,47 @@
+const Sequelize = require("sequelize");
+const conexao = require("../config/database");
+
+const db = {};
+
+db.Sequelize = Sequelize;
+db.conexao = conexao;
+
+db.Veiculo = require("./veiculo.model");
+db.Pagamento = require("./pagamento.model");
+db.Manutencao = require("./manutencao.model");
+db.Condutor = require("./condutor.model");
+db.Carga = require("./carga.model");
+
+// Relação Veiculo <-> Pagamento
+db.Veiculo.hasMany(db.Pagamento, { foreignKey: 'veiculo', as: 'pagamentos' });
+db.Pagamento.belongsTo(db.Veiculo, {
+  foreignKey: "veiculo", // Nome da chave estrangeira na tabela Subject
+  targetKey: "id", // Chave primária no modelo Teacher
+  as: "veiculo_pagamento", // Alias para a relação
+});
+
+// Relação Veiculo <-> Manutencao
+db.Veiculo.hasMany(db.Manutencao, { foreignKey: 'veiculo', as: 'manutencoes' });
+db.Manutencao.belongsTo(db.Veiculo, {
+  foreignKey: "veiculo", // Nome da chave estrangeira na tabela Subject
+  targetKey: "id", // Chave primária no modelo Teacher
+  as: "veiculo_manutencao", // Alias para a relação
+});
+
+// Relação Veiculo <-> Condutor
+db.Veiculo.hasOne(db.Condutor, { foreignKey: 'veiculo_atual', as: 'condutor' });
+db.Condutor.belongsTo(db.Veiculo, {
+  foreignKey: "veiculo_atual", // Nome da chave estrangeira na tabela Subject
+  targetKey: "id", // Chave primária no modelo Teacher
+  as: "veiculo_condutor", // Alias para a relação
+});
+
+// Relação Veiculo <-> Carga
+db.Veiculo.hasMany(db.Carga, { foreignKey: 'veiculo', as: 'cargas' });
+db.Carga.belongsTo(db.Veiculo, {
+  foreignKey: "veiculo", // Nome da chave estrangeira na tabela Subject
+  targetKey: "id", // Chave primária no modelo Teacher
+  as: "veiculo_carga", // Alias para a relação
+});
+
+module.exports = db;
