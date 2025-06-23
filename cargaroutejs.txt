@@ -1,0 +1,14 @@
+const express = require("express");
+const router = express.Router();
+
+const middleware = require("../middleware");
+
+const cargaController = require("../controllers/carga.controller");
+
+router.get("/cargas", middleware.checkToken, cargaController.getAllCargas);
+router.get("/carga/:id", middleware.checkToken, cargaController.getCargaById);
+router.post("/carga", middleware.checkToken, cargaController.createCarga);
+router.put("/carga/:id", middleware.checkToken, cargaController.updateCarga);
+router.delete("/carga/:id", middleware.checkToken, cargaController.deleteCarga);
+
+module.exports = router;
