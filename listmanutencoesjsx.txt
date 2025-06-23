@@ -1,0 +1,167 @@
+import { useEffect, useState, useContext } from 'react';
+import { Link } from 'react-router-dom';
+import { AuthContext } from '../../contexts/AuthContext';
+import axios from 'axios';
+
+const ListarManutencoes = () => {
+
+    const [manutencoes, setManutencoes] = useState([]);
+    const [success, setSuccess] = useState(false);
+    const [error, setError] = useState("");
+
+    const { token } = useContext(AuthContext);
+
+    useEffect(() => {
+        axios.get("http://localhost:5000/api/v1/manutencoes", {
+            /* headers: {
+                Authorization: token ? `Bearer ${token}` : undefined,
+            }, */
+        })
+        .then((res) => {
+            if (res.data.status) {
+                setManutencoes(res.data.data);
+            } else {
+                setError("Ocorreu um erro na execução do pedido.");
+            }
+        })
+        .catch((error) => {
+            setError("Erro na ligação à API. " + error.message);
+        });
+    }/* , [token] */);
+
+    const [manutencaoToDelete, setManutencaoToDelete] = useState(null);
+
+    const deleteManutencao = (id) => {
+        axios.delete(`http://localhost:5000/api/v1/manutencao/${id}`, {
+            /* headers: {
+                Authorization: token ? `Bearer ${token}` : undefined,
+            }, */
+        })
+        .then((res) => {
+            if (res.status === 204) {
+                setSuccess(true);
+                setManutencoes((prevManutencoes) =>
+                    prevManutencoes.filter((manutencao) => manutencao.id !== id)
+                );
+            } else {
+                setError("Ocorreu um erro ao eliminar a carga.");
+            }     
+        })
+        .catch((error) => {
+            setError("Erro na ligação à API. " + error.message);
+            console.error("Erro ao eliminar manutenção:", error);
+        })
+    };
+
+    return (
+        <>
+            <div className="container py-4">
+                <header className="d-flex justify-content-between align-items-center mb-4">
+                    <h1 className="mb-0"><i className="bi bi-tools"></i> Lista de Manutenções</h1>
+                    <a href="/manutencao/create" className="btn btn-success">
+                        <i className="bi bi-plus-circle-fill"></i> Registar Nova Manutenção
+                    </a>
+                </header>
+                {success && (
+                    <div className="alert alert-success alert-dismissible fade show text-center mb-4" role="alert">
+                        <i className="bi bi-check-circle-fill me-2"></i>
+                        Manutenção eliminada com sucesso!
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                )}
+                {error && (
+                    <div className="alert alert-danger alert-dismissible fade show text-center mb-4" role="alert">
+                        <i className="bi bi-exclamation-triangle-fill me-2"></i>
+                        {error}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                )}
+                <div className="card shadow-sm">
+                    <div className="card-header py-3">
+                        <h5 className="mb-0"><i className="bi bi-table"></i> Manutenções Registadas</h5>
+                    </div>
+                    <div className="card-body">
+                        <div className="table-responsive">
+                            {manutencoes.length === 0 ? (
+                                <div className="alert alert-info" role="alert">
+                                    Não existem manutenções para mostrar.
+                                </div>
+                            ) : (
+                                <table className="table table-hover table-sm align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Veículo (Matrícula)</th>
+                                            <th>Tipo de Manutenção</th>
+                                            <th>Custo</th>
+                                            <th>Data Manutenção</th>
+                                            <th>Próxima Manutenção</th>
+                                            <th className="text-end">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {manutencoes.map((manutencao) => (
+                                            <tr key={manutencao.id}>
+                                                <td>{manutencao.id}</td>
+                                                <td>{manutencao.veiculo_manutencao.marca} {manutencao.veiculo_manutencao.modelo} - ({manutencao.veiculo_manutencao.matricula})</td>
+                                                <td>{manutencao.tipo_de_manutencao}</td>
+                                                <td>{manutencao.custo} €</td>
+                                                <td>{manutencao.data_manutencao}</td>
+                                                <td>{manutencao.proxima_manutencao}</td>
+                                                <td className="text-end">
+                                                    <Link
+                                                        to={`/manutencao/${manutencao.id}`}
+                                                        className="btn btn-sm btn-outline-info me-1"
+                                                        title="Ver Detalhes">
+                                                            <i className="bi bi-eye"></i>
+                                                    </Link>
+                                                    <Link
+                                                        to={`/manutencao/edit/${manutencao.id}`}
+                                                        className="btn btn-sm btn-outline-primary me-1"
+                                                        title="Editar">
+                                                            <i className="bi bi-pencil"></i>
+                                                    </Link>
+                                                    <button
+                                                        className="btn btn-sm btn-outline-danger"
+                                                        title="Eliminar"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#deleteModal" 
+                                                        onClick={() => setManutencaoToDelete(manutencao)}>
+                                                            <i className="bi bi-trash"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            )}
+                        </div>
+                    </div>
+                    <div className="card-footer text-center">
+                        <small className="text-muted">Fim da lista. Existem {manutencoes.length} manutenções registadas.</small>
+                    </div>
+                </div>
+            </div>
+            <div className="modal fade" id="deleteModal" tabIndex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                <div className="modal-dialog" role="document">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h5 className="modal-title" id="deleteModalLabel">Eliminar Manutenção</h5>
+                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div className="modal-body">
+                            <p>Tem a certeza que deseja eliminar a manutenção ID: <strong>{manutencaoToDelete?.id} - ({manutencaoToDelete?.tipo_de_manutencao})</strong>?</p>
+                            <p className="text-danger">Esta ação não pode ser revertida.</p>
+                        </div>
+                        <div className="modal-footer">
+                            <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="button" className="btn btn-danger" data-bs-dismiss="modal" onClick={() => deleteManutencao(manutencaoToDelete.id)}>Eliminar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </>
+    );
+};
+
+export default ListarManutencoes;
