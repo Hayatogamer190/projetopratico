@@ -1,0 +1,14 @@
+const express = require("express");
+const router = express.Router();
+
+const middleware = require("../middleware");
+
+const manutencaoController = require("../controllers/manutencao.controller");
+
+router.get("/manutencoes", middleware.checkToken, manutencaoController.getAllManutencoes);
+router.get("/manutencao/:id", middleware.checkToken, manutencaoController.getManutencaoById);
+router.post("/manutencao", middleware.checkToken, manutencaoController.createManutencao);
+router.put("/manutencao/:id", middleware.checkToken, manutencaoController.updateManutencao);
+router.delete("/manutencao/:id", middleware.checkToken, manutencaoController.deleteManutencao);
+
+module.exports = router;
