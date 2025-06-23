@@ -1,0 +1,102 @@
+import { useEffect, useState, useContext } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { Link } from 'react-router-dom';
+import { AuthContext } from "../../contexts/AuthContext";
+import axios from "axios";
+
+const VerManutencao = () => {
+
+    const { id } = useParams();
+    const [manutencao, setManutencao] = useState([]);
+
+    const { token } = useContext(AuthContext);
+
+    useEffect(() => {
+        if (id && token) {
+            axios.get(`http://localhost:5000/api/v1/manutencao/${id}`, {
+                headers: {
+                    Authorization: token ? `Bearer ${token}` : undefined,
+                },
+            })
+            .then((res) => {
+                setManutencao(res.data.data);
+            })
+            .catch(() => setError("Erro ao carregar dados do viagem."));
+        }
+    }, [id, token]);
+
+    return (
+        <>
+            <main className="container py-4">
+                <header className="d-flex justify-content-between align-items-center mb-4">
+                    <h1 className="mb-0"><i className="bi bi-wrench-adjustable-circle"></i> Detalhes da Manutenção ID: <span className="text-primary">{manutencao.id} - ({manutencao.tipo_de_manutencao})</span></h1>
+                    <a href="/manutencoes" className="btn btn-outline-secondary"><i className="bi bi-arrow-left-circle"></i> Voltar à Lista</a>
+                </header>
+
+                <div className="card shadow-sm">
+                    <div className="card-header">
+                        <h5 className="mb-0"><i className="bi bi-info-circle-fill"></i> Manutenção para o veículo {manutencao.veiculo_manutencao ? ( <> {manutencao.veiculo_manutencao.marca} {manutencao.veiculo_manutencao.modelo} - ({manutencao.veiculo_manutencao.matricula}) </> ) : ( "" )} </h5>
+                    </div>
+                    <div className="card-body">
+                        <div className="row details-list">
+                            <div className="col-md-12">
+                                <dl className="row">
+                                    <dt className="col-sm-4 col-lg-3">Tipo de Manutenção:</dt>
+                                    <dd className="col-sm-8 col-lg-9">{manutencao.tipo_de_manutencao}</dd>
+
+                                    <dt className="col-sm-4 col-lg-3">Custo:</dt>
+                                    <dd className="col-sm-8 col-lg-9">{manutencao.custo} €</dd>
+
+                                    <dt className="col-sm-4 col-lg-3">Data da Manutenção:</dt>
+                                    <dd className="col-sm-8 col-lg-9">{manutencao.data_manutencao}</dd>
+
+                                    <dt className="col-sm-4 col-lg-3">Próxima Manutenção:</dt>
+                                    <dd className="col-sm-8 col-lg-9">{manutencao.proxima_manutencao}</dd>
+                                </dl>
+                            </div>
+                        </div>
+                        <hr />
+
+                        <div className="section-title">
+                            <h5 className="mt-4"><i className="bi bi bi-truck"></i> Veículo Atribuído</h5>
+                        </div>
+                        {manutencao.veiculo_manutencao ? (
+                            <ul className="list-group">
+                                <li className="list-group-item">
+                                    <div className="d-flex w-100 justify-content-between align-items-center">
+                                        <div>
+                                            <h6 className="mb-1">{manutencao.veiculo_manutencao.marca} {manutencao.veiculo_manutencao.modelo} ({manutencao.veiculo_manutencao.matricula})</h6>
+                                            <small className="text-muted">Tipo: {manutencao.veiculo_manutencao.tipo}</small>
+                                        </div>
+                                        {
+                                            manutencao.veiculo_manutencao.estado === 'Operacional' ? <span className="badge text-bg-success">Operacional</span> :
+                                            manutencao.veiculo_manutencao.estado === 'Em Manutenção' ? <span className="badge text-bg-warning">Em Manutenção</span> :
+                                            manutencao.veiculo_manutencao.estado === 'Vendido' ? <span className="badge text-bg-secondary">Vendido</span> :
+                                            manutencao.veiculo_manutencao.estado === 'Fora de Serviço' ? <span className="badge text-bg-danger">Fora de Serviço</span> :
+                                            manutencao.veiculo_manutencao.estado === 'Abatido' ? <span className="badge text-bg-dark">Abatido</span> :
+                                            <span className="badge text-bg-light">Desconhecido</span>
+                                        }
+                                    </div>
+                                </li>
+                            </ul>
+                        ) : (
+                            <div className="alert alert-info" role="alert">
+                                Esta manutenção não tem nenhum veículo atribuído.
+                            </div>
+                        )}
+                    </div>
+                    <div className="card-footer text-end">
+                        <Link
+                            to={`/manutencao/edit/${manutencao.id}`}
+                            className="btn btn-primary"
+                            title="Editar">
+                                <i className="bi bi-pencil-fill"></i> Editar Manutenção
+                        </Link>
+                    </div>
+                </div>
+            </main>
+        </>
+    )
+}
+
+export default VerManutencao;
